@@ -22,7 +22,7 @@ module Scruby
   class Server
     attr_reader :host, :port, :path, :buffers, :control_buses, :audio_buses
     DEFAULTS = { :buffers => 1024, :control_buses => 4096, :audio_buses => 128, :audio_outputs => 8, :audio_inputs => 8, 
-      :host => 'localhost', :port => 57111, :path => '/Applications/SuperCollider/scsynth'
+      :host => 'localhost', :port => 57111, :path => '/Applications/SuperCollider/SuperCollider.app/Contents/Resources/scsynth'
       }
 
     # Initializes and registers a new Server instance and sets the host and port for it.
@@ -34,7 +34,7 @@ module Scruby
     #   $ man scsynth
     # 
     # @param [Hash] opts the options to create a message with.
-    # @option opts [String] :path ('scsynt' on Linux, '/Applications/SuperCollider/scsynth' on Mac) scsynth binary path
+    # @option opts [String] :path ('scsynt' on Linux, '/Applications/SuperCollider/SuperCollider.app/Contents/Resources/scsynth' on Mac) scsynth binary path
     # @option opts [String] :host ('localhost') SuperCollider Server address
     # @option opts [Fixnum] :port (57111) TCP port
     # @option opts [Fixnum] :control_buses (4096) Number of buses for routing control data, indices start at 0
