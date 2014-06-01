@@ -13,7 +13,6 @@ module Scruby
     module UgenOperations
       p "Loading operation_indices.yaml"
       f = File.open( File.dirname(__FILE__) + "/operation_indices.yaml" )
-      p f.read
       operation_indices = YAML::load f
       UNARY      = operation_indices['unary']
       BINARY     = operation_indices['binary']
