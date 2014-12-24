@@ -1,6 +1,6 @@
 class Proc
   def arguments
-    self.parameters.map &:last
+    self.parameters.map { |_, name| name }
   end
   alias :value :call
 end

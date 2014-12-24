@@ -96,7 +96,7 @@ describe Buffer do
       end
       
       it "should send alloc message for each Buffer and instantiate" do
-        @buffers.should have(8).buffers
+        @buffers.count.should eq 8
         @buffers.each do |buff|
           @server.output.should =~ %r{\[ "/b_alloc", #{ buff.buffnum }, 4096, 2, 0 \]}
         end

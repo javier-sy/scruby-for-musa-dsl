@@ -56,7 +56,7 @@ describe Server do
     end
 
     it "should not rise scynth not found error" do
-      lambda{ @server.boot }.should_not raise_error(Server::SCError)
+      lambda{ @server.boot }.should_not raise_error
     end
 
     it "should not reboot" do
@@ -104,14 +104,14 @@ describe Server do
     end
     
     it "should send synthdef" do
-      sdef = mock 'sdef', :encode => [ 83, 67, 103, 102, 0, 0, 0, 1, 0, 1, 4, 104, 111, 108, 97, 0, 2, 67, -36, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 6, 83, 105, 110, 79, 115, 99, 2, 0, 2, 0, 1, 0, 0, -1, -1, 0, 0, -1, -1, 0, 1, 2, 0, 0 ].pack('C*')
+      sdef = double 'sdef', :encode => [ 83, 67, 103, 102, 0, 0, 0, 1, 0, 1, 4, 104, 111, 108, 97, 0, 2, 67, -36, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 6, 83, 105, 110, 79, 115, 99, 2, 0, 2, 0, 1, 0, 0, -1, -1, 0, 0, -1, -1, 0, 1, 2, 0, 0 ].pack('C*')
       @server.send_synth_def sdef
       sleep 0.1
       @server.output.should =~ %r{\[ "#bundle", 1, \n\s*\[ "/d_recv", DATA\[56\], 0 \]\n\]}
     end
     
     it "should send synthdef2" do
-      sdef = mock 'sdef', :encode => [83, 67, 103, 102, 0, 0, 0, 1, 0, 1, 3, 114, 101, 99, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 6, 98, 117, 102, 110, 117, 109, 0, 0, 0, 3, 7, 67, 111, 110, 116, 114, 111, 108, 1, 0, 0, 0, 1, 0, 0, 1, 2, 73, 110, 2, 0, 1, 0, 2, 0, 0, 255, 255, 0, 0, 2, 2, 7, 68, 105, 115, 107, 79, 117, 116, 2, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0].pack('C*')
+      sdef = double 'sdef', :encode => [83, 67, 103, 102, 0, 0, 0, 1, 0, 1, 3, 114, 101, 99, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 6, 98, 117, 102, 110, 117, 109, 0, 0, 0, 3, 7, 67, 111, 110, 116, 114, 111, 108, 1, 0, 0, 0, 1, 0, 0, 1, 2, 73, 110, 2, 0, 1, 0, 2, 0, 0, 255, 255, 0, 0, 2, 2, 7, 68, 105, 115, 107, 79, 117, 116, 2, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0].pack('C*')
       @server.send_synth_def sdef
       sleep 0.1
       @server.output.should =~ %r{\[ "#bundle", 1, \n\s*\[ "/d_recv", DATA\[100\], 0 \]\n\]}
@@ -138,14 +138,14 @@ describe Server do
       @server.__send__(@kind).concat([nil, nil, @class.new, nil, nil, nil, @class.new])
       @server.__send__ :allocate, @kind, @class.new, @class.new, @class.new
       elements = @server.__send__(@kind)[@max_size-@allowed_elements..-1].compact
-      elements.should have(5).elements
+      elements.length.should eq 5
     end
     
     it "should allocate by appending various elements" do
       @server.__send__(@kind).concat([nil, nil, @class.new, nil, nil, nil, @class.new])
       @server.__send__ :allocate, @kind, @class.new, @class.new, @class.new, @class.new
       elements = @server.__send__(@kind)[@max_size-@allowed_elements..-1].compact
-      elements.should have(6).elements
+      elements.length.should eq 6
     end
     
     it "should not surpass the max buffer limit" do

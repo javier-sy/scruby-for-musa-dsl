@@ -83,13 +83,13 @@ describe Bus do
       it "should allocate consecutive when passing more than one channel for audio" do
         @audio.index.should == 16
         buses = @server.audio_buses
-        buses[16..-1].should have(4).elements
+        buses[16..-1].count.should eq 4
         Bus.audio(@server).index.should == 20
       end
       
       it "should allocate consecutive when passing more than one channel for control" do
         @control.index.should == 0
-        @server.control_buses.should have(4).elements
+        @server.control_buses.count.should eq 4
         Bus.control(@server).index.should == 4
       end
       
