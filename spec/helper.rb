@@ -4,6 +4,8 @@ require 'arguments'
 require 'yaml'
 require 'ruby-osc'
 
+require 'pry'
+
 $:.unshift( File.dirname(__FILE__) + '/../lib' ) 
 
 require "scruby/core_ext/object"

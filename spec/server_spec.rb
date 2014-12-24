@@ -40,18 +40,18 @@ end
 describe Message do
   it "should encode array as Message Blob" do
     m = Message.new "/b_allocRead", 1, "path", 1, -1, ["/b_query", 1]
-    m.encode.should == "/b_allocRead\000\000\000\000,isiib\000\000\000\000\000\001path\000\000\000\000\000\000\000\001\377\377\377\377\000\000\000\024/b_query\000\000\000\000,i\000\000\000\000\000\001"
+    m.encode.bytes.should == "/b_allocRead\000\000\000\000,isiib\000\000\000\000\000\001path\000\000\000\000\000\000\000\001\377\377\377\377\000\000\000\024/b_query\000\000\000\000,i\000\000\000\000\000\001".bytes
   end
 end
 
 describe Server do
   
   describe "booting" do
-    before do
+    before :each do
       @server = Server.new
     end
 
-    after do
+    after :each do
       @server.quit
     end
 
