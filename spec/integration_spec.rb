@@ -68,6 +68,7 @@ describe "synthdef examples" do
     children[7].should be_instance_of(Out)
     children[8].should be_instance_of(Out)
     #the order of the elements is different than in supercollider, but at least has the encoded string is the same size so i guess its fine
+    binding.pry
     sdef.encode.length.should eq 261
   end
   

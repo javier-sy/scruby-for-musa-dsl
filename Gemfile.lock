@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    scruby (0.2.7.1)
+    scruby (0.2.7.2)
       arguments (~> 0.6)
       live (~> 0.1)
       ruby-osc (~> 0.3)
@@ -9,24 +9,30 @@ PATH
 GEM
   remote: http://rubygems.org/
   specs:
-    ParseTree (3.0.7)
-      RubyInline (>= 3.7.0)
-      sexp_processor (>= 3.0.0)
+    ParseTree (3.0.9)
+      RubyInline (~> 3.9.0)
+      sexp_processor (~> 3.2.0)
     RubyInline (3.9.0)
       ZenTest (~> 4.3)
-    ZenTest (4.5.0)
+    ZenTest (4.11.0)
     arguments (0.6)
       ParseTree (>= 3.0.3)
       ruby2ruby (= 1.1.9)
       ruby_parser (>= 2.0.2)
+    coderay (1.1.0)
     diff-lcs (1.1.2)
-    eventmachine (0.12.10)
-    highline (1.6.1)
-    hoe (2.9.1)
-      rake (>= 0.8.7)
+    eventmachine (1.0.4)
+    highline (1.6.21)
+    hoe (3.13.0)
+      rake (>= 0.8, < 11.0)
     live (0.1.2)
       highline
-    rake (0.8.7)
+    method_source (0.8.2)
+    pry (0.10.1)
+      coderay (~> 1.1.0)
+      method_source (~> 0.8.1)
+      slop (~> 3.4)
+    rake (10.4.2)
     rspec (2.5.0)
       rspec-core (~> 2.5.0)
       rspec-expectations (~> 2.5.0)
@@ -35,19 +41,21 @@ GEM
     rspec-expectations (2.5.0)
       diff-lcs (~> 1.1.2)
     rspec-mocks (2.5.0)
-    ruby-osc (0.3.2)
+    ruby-osc (0.31.0)
       eventmachine (>= 0.12.8)
     ruby2ruby (1.1.9)
       ParseTree
       hoe (>= 1.5.3)
-    ruby_parser (2.0.6)
+    ruby_parser (2.3.1)
       sexp_processor (~> 3.0)
-    sexp_processor (3.0.5)
+    sexp_processor (3.2.0)
+    slop (3.6.0)
 
 PLATFORMS
   ruby
 
 DEPENDENCIES
   bundler
+  pry
   rspec
   scruby!

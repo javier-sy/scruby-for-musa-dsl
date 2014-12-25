@@ -22,7 +22,7 @@ module Scruby
   class Server
     attr_reader :host, :port, :path, :buffers, :control_buses, :audio_buses
     DEFAULTS = { :buffers => 1024, :control_buses => 4096, :audio_buses => 128, :audio_outputs => 8, :audio_inputs => 8, 
-      :host => 'localhost', :port => 57111, :path => '/Applications/SuperCollider/scsynth'
+      :host => 'localhost', :port => 57111, :path => '/Applications/SuperCollider/SuperCollider.app/Contents/Resources/scsynth'
       }
 
     # Initializes and registers a new Server instance and sets the host and port for it.
@@ -100,7 +100,8 @@ module Scruby
     # Sends the /quit OSC signal to the scsynth
     def quit
       Server.all.delete self
-      send '/quit'
+      send '/quit' if running?
+      @thread = nil
     end
 
     # Sends an OSC command or +Message+ to the scsyth server.

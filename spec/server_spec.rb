@@ -66,9 +66,10 @@ describe Server do
     end
     
     it "should remove server from server list" do
+      Server.all.should include @server
       @server.boot
       @server.quit
-      Server.all.should be_empty
+      Server.all.should_not include @server
     end
 
     it "should raise scsynth not found error" do
