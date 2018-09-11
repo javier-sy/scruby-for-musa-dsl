@@ -52,7 +52,7 @@ module Scruby
       end
     end
 
-    [Ugen, Fixnum, Float].each{ |k| k.send :include, UgenOperations }
+    [Ugen, Integer, Float].each{ |k| k.send :include, UgenOperations }
   end
 end
 
