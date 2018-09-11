@@ -29,7 +29,11 @@ describe Ugens do
   end
 
   it 'each ugen should be Ugen subclass' do
-    @udefs.each_pair { |key, val| eval(key).superclass.should eql( Scruby::Ugens::Ugen )  }
+    @udefs.each_pair do |key, val|
+      # Note ::Osc and Scruby::Ugens::Osc are distinct
+      klass = Scruby::Ugens.const_get key
+      klass.superclass.should eql( Scruby::Ugens::Ugen )
+    end
   end
 
   it 'should resond to :ar and :kr' do
@@ -38,12 +42,11 @@ describe Ugens do
   end
 
   it "should use default values and passed values" do
-    Gendy1.should_receive(:new).with( :audio, 10, 20, 1, 1, 550, 660, 0.5, 0.5, 12, 1 ).and_return( mock('ugen', :muladd => nil) )
+    Gendy1.should_receive(:new).with( :audio, 10, 20, 1, 1, 550, 660, 0.5, 0.5, 12, 1 ).and_return( double('ugen', :muladd => nil) )
     Gendy1.ar 10, 20, :knum => 1, :minfreq => 550
   end
   
   it "should raise argumen error if not passed required" do
-    Gendy1.stub!(:new)
     lambda { Gendy1.ar }.should raise_error(ArgumentError)
   end
   
@@ -52,7 +55,7 @@ describe Ugens do
   end
   
   it "should initialize using demand" do
-    Dbrown.new(1,2,3,4).inputs.should == [1,2,3,4]
+    Dbrown.new(1,2,3,4).inputs.should eq [1,2,3,4]
   end
   
   it "should have public new method for scalar" do

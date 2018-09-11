@@ -30,7 +30,7 @@ describe "synthdef examples" do
 
   it "should encode with out" do
     sdef = SynthDef.new(:out){ Out.ar(0, SinOsc.ar) }
-    sdef.children.should have(2).children
+    sdef.children.length.should eq 2
     
     sdef.children[0].should be_instance_of( SinOsc )
     sdef.children[1].should be_instance_of( Out ) 
@@ -68,7 +68,8 @@ describe "synthdef examples" do
     children[7].should be_instance_of(Out)
     children[8].should be_instance_of(Out)
     #the order of the elements is different than in supercollider, but at least has the encoded string is the same size so i guess its fine
-    sdef.encode.should have(261).chars
+    binding.pry
+    sdef.encode.length.should eq 261
   end
   
   it "should encode 'complex' sdef" do
@@ -79,7 +80,7 @@ describe "synthdef examples" do
       Out.ar 0, sig*env
     end
 
-    sdef.children.should have(8).children
+    sdef.children.length.should eq 8
     sdef.constants.should == [0, 0.5, 1, 2, -99, 5, -4]
     expected = [ 83, 67, 103, 102, 0, 0, 0, 1, 0, 1, 2, 97, 109, 0, 7, 0, 0, 0, 0, 63, 0, 0, 0, 63, -128, 0, 0, 64, 0, 0, 0, -62, -58, 0, 0, 64, -96, 0, 0, -64, -128, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 103, 97, 116, 101, 0, 0, 9, 112, 111, 114, 116, 97, 100, 111, 114, 97, 0, 1, 10, 109, 111, 100, 117, 108, 97, 100, 111, 114, 97, 0, 2, 3, 97, 109, 112, 0, 3, 0, 8, 7, 67, 111, 110, 116, 114, 111, 108, 1, 0, 0, 0, 4, 0, 0, 1, 1, 1, 1, 6, 83, 105, 110, 79, 115, 99, 1, 0, 2, 0, 1, 0, 0, 0, 0, 0, 2, -1, -1, 0, 0, 1, 6, 77, 117, 108, 65, 100, 100, 1, 0, 3, 0, 1, 0, 0, 0, 1, 0, 0, -1, -1, 0, 1, -1, -1, 0, 1, 1, 6, 83, 105, 110, 79, 115, 99, 2, 0, 2, 0, 1, 0, 0, 0, 0, 0, 1, -1, -1, 0, 0, 2, 12, 66, 105, 110, 97, 114, 121, 79, 112, 85, 71, 101, 110, 2, 0, 2, 0, 1, 0, 2, 0, 3, 0, 0, 0, 2, 0, 0, 2, 6, 69, 110, 118, 71, 101, 110, 1, 0, 17, 0, 1, 0, 0, 0, 0, 0, 0, -1, -1, 0, 2, -1, -1, 0, 0, -1, -1, 0, 2, -1, -1, 0, 3, -1, -1, 0, 0, -1, -1, 0, 3, -1, -1, 0, 2, -1, -1, 0, 4, -1, -1, 0, 2, -1, -1, 0, 3, -1, -1, 0, 5, -1, -1, 0, 6, -1, -1, 0, 0, -1, -1, 0, 3, -1, -1, 0, 5, -1, -1, 0, 6, 1, 12, 66, 105, 110, 97, 114, 121, 79, 112, 85, 71, 101, 110, 2, 0, 2, 0, 1, 0, 2, 0, 4, 0, 0, 0, 5, 0, 0, 2, 3, 79, 117, 116, 2, 0, 2, 0, 0, 0, 0, -1, -1, 0, 0, 0, 6, 0, 0, 0, 0 ].pack('c*')
     sdef.encode.should == expected

@@ -102,7 +102,8 @@ module Scruby
     # Sends the /quit OSC signal to the scsynth
     def quit
       Server.all.delete self
-      send '/quit'
+      send '/quit' if running?
+      @thread = nil
     end
 
     # Sends an OSC command or +Message+ to the scsyth server.

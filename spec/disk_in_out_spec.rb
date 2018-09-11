@@ -78,7 +78,7 @@ describe 'IO ugens' do
     end
 
     it "should return an array of output proxies" do
-      @proxies.should have(@channels).proxies
+      @proxies.count.should eq @channels
       @proxies.each_with_index do |proxy, i|
         proxy.source.should be_a(@class)
         proxy.should be_a(OutputProxy)

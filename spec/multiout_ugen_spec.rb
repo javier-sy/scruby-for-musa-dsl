@@ -18,11 +18,11 @@ end
 
 describe Control do
   before do
-    sdef = mock( 'SynthDef', :children => [] )
-    Ugen.stub!( :synthdef ).and_return( sdef )
+    sdef = double( 'SynthDef', :children => [] )
+    Ugen.stub( :synthdef ).and_return( sdef )
 
-    @proxy = mock(OutputProxy, :instance_of_proxy? => true)
-    OutputProxy.stub!( :new ).and_return( @proxy )
+    @proxy = double(OutputProxy, :instance_of_proxy? => true)
+    OutputProxy.stub( :new ).and_return( @proxy )
 
     @names = Array.new( rand(7) + 3 ) do |i|
       ControlName.new "control_#{i}", 1, :control, i
@@ -34,7 +34,7 @@ describe Control do
 
   it "should return an array of proxies" do
     @proxies.should be_a( DelegatorArray )
-    @proxies.should have( @names.size ).proxies
+    @proxies.length.should eq @names.size
   end
 
   it "should set channels" do
@@ -61,8 +61,8 @@ end
 describe OutputProxy do
   
   before do
-    @sdef = mock( 'sdef', :children => [] )
-    Ugen.stub!( :synthdef ).and_return( @sdef )
+    @sdef = double( 'sdef', :children => [] )
+    Ugen.stub( :synthdef ).and_return( @sdef )
     @name  = ControlName.new( "control", 1, :control, 0)
     @names = [@name]
     @output_index = 1

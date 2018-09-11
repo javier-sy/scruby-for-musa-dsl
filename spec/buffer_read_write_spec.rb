@@ -36,7 +36,7 @@ describe 'Buffer Read Ugens' do
 
     it "should return an array of output proxies" do
       @proxies.should be_a(Array)
-      @proxies.should have(@channels).proxies
+      @proxies.count.should eq @channels
       @proxies.each_with_index do |proxy, i|
         proxy.source.should be_a(@class)
         proxy.should be_a(OutputProxy)
@@ -287,7 +287,7 @@ describe 'Buffer write Ugens' do
     end
     
     it "should have one proxy" do
-      @proxies.should have(@channels).proxy
+      @proxies.count.should eq @channels
     end
 
     it "should be instance of PlayBuf" do
@@ -311,7 +311,7 @@ describe 'Buffer write Ugens' do
     end
     
     it "should have one proxy" do
-      @proxies.should have(@channels).proxy
+      @proxies.count.should eq @channels
     end
 
     it "should be instance of PlayBuf" do

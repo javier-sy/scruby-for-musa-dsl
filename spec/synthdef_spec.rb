@@ -22,7 +22,7 @@ describe SynthDef, 'instantiation' do
   describe 'initialize' do
     before do
     @sdef = SynthDef.new( :name ){}
-    @sdef.stub! :collect_control_names
+    @sdef.stub :collect_control_names
   end
 
     it "should instantiate" do
@@ -53,7 +53,7 @@ describe SynthDef, 'instantiation' do
   
   describe "options" do
     before do
-      @options = mock Hash
+      @options = double Hash
     end
   
     it "should accept options" do
@@ -75,7 +75,7 @@ describe SynthDef, 'instantiation' do
   describe '#collect_control_names' do
     before do
       @sdef     = SynthDef.new( :name ){}
-      @function = mock "grap_function", :arguments => [:arg1, :arg2, :arg3]
+      @function = double "grap_function", :arguments => [:arg1, :arg2, :arg3]
     end
     
     it "should get the argument names for the provided function" do
@@ -93,7 +93,7 @@ describe SynthDef, 'instantiation' do
     end
     
     it "should instantiate and return a ControlName for each function name" do
-      c_name = mock :control_name
+      c_name = double :control_name
       ControlName.should_receive( :new ).at_most(3).times.and_return c_name
       control_names = @sdef.send_msg :collect_control_names, @function, [1,2,3], []
       control_names.size.should == 3
@@ -108,7 +108,7 @@ describe SynthDef, 'instantiation' do
     end
     
     it "should not return more elements than the function argument number" do
-      @sdef.send_msg( :collect_control_names, @function, [1, 2, 3, 4, 5], [] ).should have( 3 ).elements
+      @sdef.send_msg( :collect_control_names, @function, [1, 2, 3, 4, 5], [] ).length.should eq 3
     end
   end
 
@@ -119,7 +119,7 @@ describe SynthDef, 'instantiation' do
     
     before do
       @sdef     = SynthDef.new( :name ){}
-      @function = mock "grap_function", :arguments => [:arg1, :arg2, :arg3, :arg4]
+      @function = double "grap_function", :arguments => [:arg1, :arg2, :arg3, :arg4]
       @control_names = Array.new( rand(10)+15 ) { |i| ControlName.new "arg#{i+1}".to_sym, i, RATES[ rand(3) ], i }
     end
 
@@ -149,9 +149,9 @@ describe SynthDef, 'instantiation' do
     end
     
     it "should call graph function with correct args" do
-      function = mock("function", :call => [] )
+      function = double("function", :call => [] )
       proxies  = @sdef.send_msg( :build_controls, @control_names )
-      @sdef.stub!( :build_controls ).and_return( proxies )
+      @sdef.stub( :build_controls ).and_return( proxies )
       function.should_receive( :call ).with( *proxies )
       @sdef.send_msg( :build_ugen_graph, function, @control_names)
     end
@@ -180,15 +180,15 @@ describe SynthDef, 'instantiation' do
 end
 
 
-describe "encoding" do
-
-  before :all do
-    class Spec::SinOsc < Ugen
-      def self.ar freq = 440.0, phase = 0.0 #not interested in muladd
-        new :audio, freq, phase
-      end
+module Spec
+  class SinOsc < Ugen
+    def self.ar freq = 440.0, phase = 0.0 #not interested in muladd
+      new :audio, freq, phase
     end
   end
+end
+
+describe "encoding" do
   
   before do
     @sdef = SynthDef.new(:hola) { Spec::SinOsc.ar }
@@ -229,13 +229,12 @@ describe "encoding" do
   
   describe "sending" do
 
-    before :all do
-      @server  = mock('server', :instance_of? => true, :send_synth_def => nil)
-      ::Server = mock('Server', :all => [@server])
+    before :each do
+      @server = double('server', :instance_of? => true, :send_synth_def => nil)
     end
     
     before do
-      @servers = (0..3).map{ mock('server', :instance_of? => true, :send_synth_def => nil) }
+      @servers = (0..3).map{ double('server', :instance_of? => true, :send_synth_def => nil) }
       @sdef = SynthDef.new(:hola) { Spec::SinOsc.ar }
     end
     
@@ -255,6 +254,7 @@ describe "encoding" do
     end
     
     it "should send to Server.all if not provided with a list of servers" do
+      ::Server = double('Server', :all => [@server])
       @server.should_receive(:send_synth_def).with(@sdef)
       Server.should_receive(:all).and_return([@server])
       @sdef.send

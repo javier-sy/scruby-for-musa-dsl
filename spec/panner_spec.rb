@@ -34,7 +34,7 @@ describe 'Panner' do
 
     it "should return an array of output proxies" do
       @pan.should be_a(Array)
-      @pan.should have(@channels).proxies
+      @pan.length.should eq @channels
       @pan.each_with_index do |proxy, i|
         proxy.source.should be_a(@class)
         proxy.should be_a(OutputProxy)
@@ -71,15 +71,15 @@ describe 'Panner' do
   
   shared_examples_for 'Panner with array as input' do
     it "should have n channels" do
-      @arrayed.should have(@ugens.size).proxies
+      @arrayed.length.should eq @ugens.size
     end
     
     it "should have array as channel" do
-      @arrayed.each { |a| a.should have(@channels).proxies }
+      @arrayed.each { |a| a.length.should eq @channels }
     end
     
     it "should have the same source class" do
-      @arrayed.flatten.source.uniq.should have(@ugens.size).elements
+      @arrayed.flatten.source.uniq.length.should eq @ugens.size
     end
   end
   

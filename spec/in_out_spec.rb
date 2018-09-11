@@ -24,12 +24,12 @@ end
 
 describe In do
   before do
-    @sdef = mock( 'ugen', :children => [] )
+    @sdef = double( 'ugen', :children => [] )
     Ugen.should_receive( :synthdef ).at_least( :once ).and_return( @sdef )
 
-    @proxy   = mock('output proxy' )
+    @proxy   = double('output proxy' )
     @proxies = (1..10).map{ @proxy }
-    OutputProxy.stub!(:new).and_return( @proxy )
+    OutputProxy.stub(:new).and_return( @proxy )
 
     @ar = In.ar 3
   end
@@ -41,7 +41,7 @@ describe In do
 
   it "should spec #ar" do    
     @ar.should be_instance_of( DelegatorArray )
-    @ar.should have(1).proxy
+    @ar.length.should eq 1
     @ar.first.should == @proxy
   end
 
@@ -61,14 +61,14 @@ end
 describe Out do
   shared_examples_for 'Out' do
     before do
-      @sdef = mock 'sdef', :children => [], :constants => [400, 0]
+      @sdef = double 'sdef', :children => [], :constants => [400, 0]
       Ugen.should_receive( :synthdef ).at_least( :once ).and_return @sdef
     end               
 
     it "should accept one ugen" do
       @ugen1 = MockUgen.new :audio
       @class.kr( 1, @ugen1 ).should == 0.0
-      @sdef.children.should have(2).ugens
+      @sdef.children.count.should eq 2
 
       out = @sdef.children.last
       out.rate.should     == :control
@@ -82,7 +82,7 @@ describe Out do
       @ugen3 = MockUgen.new :audio
 
       @class.kr 1, [@ugen1, @ugen2, @ugen3]
-      @sdef.children.should have(4).ugens
+      @sdef.children.count.should eq 4
 
       out = @sdef.children.last
       out.inputs.should == [1, @ugen1, @ugen2, @ugen3]
@@ -94,7 +94,7 @@ describe Out do
       @ugen3 = MockUgen.new :audio
 
       @class.kr 1, @ugen1, @ugen2, @ugen3
-      @sdef.children.should have(4).ugens
+      @sdef.children.count.should eq 4
 
       out = @sdef.children.last
       out.inputs.should == [1, @ugen1, @ugen2, @ugen3]

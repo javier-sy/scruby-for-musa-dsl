@@ -3,11 +3,9 @@ require File.expand_path(File.dirname(__FILE__)) + "/../helper"
 
 
 describe Numeric do
-  before :all do
-      @bin_op        = mock 'binop'
-      ::BinaryOpUGen = mock 'BinaryOpUGen', :new => @bin_on
-      @ugen          = mock 'ugen'
-      ::Ugen         = mock 'Ugen', :new => @ugen
+  before :each do
+      @bin_op        = double 'binop'
+      @ugen          = double 'ugen'
     end
   
   it "shoud have an scalar rate" do
@@ -28,7 +26,7 @@ describe Numeric do
    end
    
    it "should spec #input_specs" do
-     synthdef = mock('synthdef', :constants => [200.0,1,3, 400.0] )
+     synthdef = double('synthdef', :constants => [200.0,1,3, 400.0] )
      200.0.send( :input_specs, synthdef ).should == [-1,0]
      3.send( :input_specs, synthdef ).should == [-1,2]
      400.0.send( :input_specs, synthdef ).should == [-1,3]
@@ -66,7 +64,7 @@ describe Array, "monkey patches" do
     end
     
     it "should return an array the same size as the original" do
-      [1,2,3,4].collect_with_index{ nil }.should have( 4 ).items
+      [1,2,3,4].collect_with_index{ nil }.length.should eq 4
     end
     
     it "should collect_with_index" do
