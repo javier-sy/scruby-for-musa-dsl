@@ -2,12 +2,12 @@
 binary:
   !ruby/symbol +:                  0
   !ruby/symbol -:                  1
-  !ruby/symbol *:                  2
+  '!ruby/symbol *':                  2
   !ruby/symbol div:                3
   !ruby/symbol /:                  4
   !ruby/symbol mod:                5
-  !ruby/symbol <=:                 10
-  !ruby/symbol >=:                 11
+  '!ruby/symbol <=':                 10
+  '!ruby/symbol >=':                 11
   !ruby/symbol minimum:            12
   !ruby/symbol maximum:            13 #can't be called max because there is an array method calle maximum
   !ruby/symbol lcm:                17
