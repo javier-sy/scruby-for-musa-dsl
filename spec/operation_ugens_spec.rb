@@ -163,14 +163,14 @@ describe UnaryOpUGen do
     end
  
     it "should not be instance of MulAdd" do
-      unary_op = mock 'neg'
-      mult     = mock 'mult'
-      minus    = mock 'minus'
-      plus     = mock 'plus'
+      unary_op = double 'neg'
+      mult     = double 'mult'
+      minus    = double 'minus'
+      plus     = double 'plus'
       
       @audio.should_receive( :neg ).and_return( unary_op )
       @audio.should_receive( :* ).and_return( mult )
-      add = mock( '0.5', :- => minus, :zero? => false )
+      add = double( '0.5', :- => minus, :zero? => false )
       @audio.should_receive( :+ ).and_return( plus )
       
       MulAdd.new( @audio, 0, 0.5 ).should be_instance_of( Float )
@@ -185,8 +185,8 @@ describe UnaryOpUGen do
       MulAdd.new( @audio, @audio, 1 ).should be_instance_of(MulAdd)
       MulAdd.new( @audio, @audio, @scalar ).should be_instance_of(MulAdd)
       
-      bin_op_ugen = mock 'binary op ugen'
-      @audio.stub!( :* ).and_return bin_op_ugen
+      bin_op_ugen = double 'binary op ugen'
+      @audio.stub( :* ).and_return bin_op_ugen
       MulAdd.new( @audio, @audio, 0 ).should == bin_op_ugen
     end
         

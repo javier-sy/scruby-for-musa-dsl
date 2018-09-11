@@ -19,7 +19,7 @@ describe Group do
   
   before do
     Node.reset!
-    Server.stub!(:all).and_return([@server])
+    Server.stub(:all).and_return([@server])
   end
     
   describe 'Server interaction' do

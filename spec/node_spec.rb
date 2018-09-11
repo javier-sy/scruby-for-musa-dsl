@@ -16,7 +16,7 @@ describe Node do
   
   before do
     Node.reset!
-    Server.stub!(:all).and_return([@server])
+    Server.stub(:all).and_return([@server])
   end
   
   it "should have incremental uniq id" do
@@ -91,15 +91,15 @@ describe Node do
     
     describe 'map' do
       it "should just accept instances of Bus" do
-         b1 = mock 'Bus', :index => 1, :channels => 1, :rate => :audio
+         b1 = double 'Bus', :index => 1, :channels => 1, :rate => :audio
          b1.should_receive(:kind_of?).and_return(false)
          lambda { @node.map :freq1 => b1 }.should raise_error(ArgumentError)
       end
       
       it "should send map" do
-        b1 = mock 'Bus', :index => 1, :channels => 1, :rate => :control
+        b1 = double 'Bus', :index => 1, :channels => 1, :rate => :control
         b1.should_receive(:kind_of?).and_return(true)
-        b2 = mock 'Bus', :index => 2, :channels => 2, :rate => :audio
+        b2 = double 'Bus', :index => 2, :channels => 2, :rate => :audio
         b2.should_receive(:kind_of?).and_return(true)
         @node.map( :freq1 => b1, :freq2 => b2 ).should be_instance_of(Node)
         sleep 0.05

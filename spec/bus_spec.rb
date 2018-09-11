@@ -35,7 +35,49 @@ describe Bus do
         @rate   = :audio
       end
 
-      it_should_behave_like 'bus'
+      
+      it "should allocate consecutive when passing more than one channel for audio" do
+        @audio.index.should == 16
+        buses = @server.audio_buses
+        buses[16..-1].count.should eq 4
+        Bus.audio(@server).index.should == 20
+      end
+      
+      it "should allocate consecutive when passing more than one channel for control" do
+        @control.index.should == 0
+        @server.control_buses.count.should eq 4
+        Bus.control(@server).index.should == 4
+      end
+      
+      it "should set the number of channels" do
+        @audio.channels.should   == 4
+        @control.channels.should == 4
+      end
+      
+      it "should depend on a main bus" do
+        @server.audio_buses[16].main_bus.should  == @audio   #main bus
+        @server.audio_buses[17].main_bus.should  == @audio   #main bus
+        @server.control_buses[0].main_bus.should == @control #main bus
+        @server.control_buses[1].main_bus.should == @control #main bus
+      end
+    end
+  end
+  
+  describe "messaging" do
+    before :all do
+      @server = Server.new
+      @server.boot
+      @server.send "/dumpOSC", 3
+      @bus = Bus.control @server, 4
+      sleep 0.05
+    end    
+
+    after :all do
+      @server.quit
+    end
+    
+    before do
+      @server.flush
     end
 
     describe ControlBus do

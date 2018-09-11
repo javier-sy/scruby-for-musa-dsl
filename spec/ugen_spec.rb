@@ -41,7 +41,7 @@ end
 describe Ugen do
   
   before do
-    @sdef = mock 'sdef', :children => []
+    @sdef = double 'sdef', :children => []
   end
 
   it "should set constants " do
@@ -52,14 +52,14 @@ describe Ugen do
   
   it "should tell if valid input" do
     cn = ControlName.new 'cn', 1, :audio, 0
-    Ugen.valid_input?( 440 ).should       be_true
-    Ugen.valid_input?( 440.0 ).should     be_true
-    Ugen.valid_input?( [4,4] ).should     be_true
-    Ugen.valid_input?( SinOsc.ar ).should be_true
-    Ugen.valid_input?( SinOsc.ar ).should be_true
-    Ugen.valid_input?( Env.asr ).should   be_true
-    Ugen.valid_input?( cn ).should        be_true
-    Ugen.valid_input?( 'string' ).should  be_false
+    Ugen.valid_input?( 440 ).should       eq true
+    Ugen.valid_input?( 440.0 ).should     eq true
+    Ugen.valid_input?( [4,4] ).should     eq true
+    Ugen.valid_input?( SinOsc.ar ).should eq true
+    Ugen.valid_input?( SinOsc.ar ).should eq true
+    Ugen.valid_input?( Env.asr ).should   eq true
+    Ugen.valid_input?( cn ).should        eq true
+    Ugen.valid_input?( 'string' ).should  eq false
   end
   
   it "should use buffnum as input when a buffer is passed" do
@@ -81,9 +81,8 @@ describe Ugen do
   end
 
   describe 'operations' do
-    before :all do
-      @op_ugen    = mock( 'op_ugen' )
-      UnaryOpUGen = mock 'unary_op_ugen',  :new => @op_ugen
+    before :each do
+      @op_ugen = double( 'op_ugen' )
     end
     
     before do
@@ -225,11 +224,11 @@ describe Ugen do
     end
     
     it do
-      MockUgen.new( :audio, 1, [2,3], [4,5] ).should have( 2 ).items
+      MockUgen.new( :audio, 1, [2,3], [4,5] ).length.should eq 2
     end
     
     it do
-      MockUgen.new( :audio, 1, [2,3, 3], [4,5] ).should have( 3 ).items
+      MockUgen.new( :audio, 1, [2,3, 3], [4,5] ).length.should eq 3
     end
     
     it "should return an array of ugens" do
@@ -299,9 +298,9 @@ describe Ugen do
     before do
       args = [400.0, 0.0]
       @sin = SinOsc.kr *args
-      @synthdef = mock 'synthdef', :constants => args
-      @sin.stub!( :index ).and_return 1 #as if was the first child of a synthdef
-      @sin.stub!( :synthdef ).and_return @synthdef
+      @synthdef = double 'synthdef', :constants => args
+      @sin.stub( :index ).and_return 1 #as if was the first child of a synthdef
+      @sin.stub( :synthdef ).and_return @synthdef
 
       @encoded = [6, 83, 105, 110, 79, 115, 99, 1, 0, 2, 0, 1, 0, 0, -1, -1, 0, 0, -1, -1, 0, 1, 1].pack('C*')
     end
