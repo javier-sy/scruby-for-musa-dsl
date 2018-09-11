@@ -8,6 +8,7 @@ SynthDef creation and sending is robust but some features are not implemented su
 livecode.rb executable is located in the bin directory and a TextMate bundle included in extras permits livecoding from TextMate, comunication is 
 thrugh *nix pipes. Similar functionality shouldn't be too dificult to implement from Emacs or Vim.
 
+
 == Install
 
     $ [sudo] gem install scruby

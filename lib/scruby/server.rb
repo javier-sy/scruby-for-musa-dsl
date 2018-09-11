@@ -1,4 +1,4 @@
-require 'singleton'
+require 'open3'
 
 module Scruby 
   include OSC
@@ -21,10 +21,6 @@ module Scruby
 
   class Server
     attr_reader :host, :port, :path, :buffers, :control_buses, :audio_buses
-    DEFAULTS = { :buffers => 1024, :control_buses => 4096, :audio_buses => 128, :audio_outputs => 8, :audio_inputs => 8, 
-      :host => 'localhost', :port => 57111, :path => '/Applications/SuperCollider/scsynth'
-      }
-
     # Initializes and registers a new Server instance and sets the host and port for it.
     # The server is a Ruby representation of scsynth which can be a local binary or a remote    
     # server already running.
@@ -34,60 +30,62 @@ module Scruby
     #   $ man scsynth
     # 
     # @param [Hash] opts the options to create a message with.
-    # @option opts [String] :path ('scsynt' on Linux, '/Applications/SuperCollider/scsynth' on Mac) scsynth binary path
+    # @option opts [String] :path ('scsynt' if in PATH env variable otherwise '/Applications/SuperCollider/scsynth') scsynth binary path
     # @option opts [String] :host ('localhost') SuperCollider Server address
     # @option opts [Fixnum] :port (57111) TCP port
-    # @option opts [Fixnum] :control_buses (4096) Number of buses for routing control data, indices start at 0
-    # @option opts [Fixnum] :audio_buses (8) Number of audio Bus channels for hardware output and input and internal routing
-    # @option opts [Fixnum] :audio_outputs (8) Reserved buses for hardware output, indices start at 0
-    # @option opts [Fixnum] :audio_inputs (8) Reserved buses for hardware input, indices starting from the number of audio outputs
-    # @option opts [Fixnum] :buffers (1024) Number of available sample buffers
+    # @option opts [Fixnum] :control_bus_count (4096) Number of buses for routing control data, indices start at 0
+    # @option opts [Fixnum] :audio_bus_count (128) Number of audio Bus channels for hardware output and input and internal routing
+    # @option opts [Fixnum] :audio_output_count (8) Reserved buses for hardware output, indices start at 0
+    # @option opts [Fixnum] :audio_input_count (8) Reserved buses for hardware input, indices starting from the number of audio outputs
+    # @option opts [Fixnum] :buffer_count (1024) Number of available sample buffers
     # 
     def initialize opts = {}
-      @opts          = DEFAULTS.dup.merge opts
+      @path               = opts.delete(:path) || (%x(which scsynth).empty? ? '/Applications/SuperCollider/scsynth' : 'scsynth')
+      @host               = opts.delete(:host) || 'localhost'
+      @port               = opts.delete(:port) || 57111
+
+      @audio_output_count = opts.delete(:audio_output_count) || 8
+      @audio_input_count  = opts.delete(:audio_input_count)  || 8
+      @buffer_count       = opts.delete(:buffer_count)       || 1024
+      @control_bus_count  = opts.delete(:control_bus_count)  || 4096
+      @audio_bus_count    = opts.delete(:audio_bus_count)    || 128
+
       @buffers       = []
       @control_buses = []
       @audio_buses   = []
+
       @client        = Client.new port, host
-      Bus.audio self, @opts[:audio_outputs] # register hardware buses
-      Bus.audio self, @opts[:audio_inputs]
+      # Bus.audio self, @audio_output_count # register hardware buses
+      # Bus.audio self, @audio_input_count
       self.class.all << self
     end
-    
-    def host; @opts[:host]; end
-    def port; @opts[:port]; end
-    def path; @opts[:path]; end
 
     # Boots the local binary of the scsynth forking a process, it will rise a SCError if the scsynth 
     # binary is not found in path. 
     # The default path can be overriden using Server.scsynt_path=('path')
     def boot
-      raise SCError.new('Scsynth not found in the given path') unless File.exists? path
-      if running?
-        warn "Server on port #{ port } allready running"
-        return self 
-      end
+      raise SCError.new("scsyth already running on port #{port}") if running?
 
-      ready   = false
-      timeout = Time.now + 2
+      ready, timeout = false, Time.now + 2
       @thread = Thread.new do
-        IO.popen "cd #{ File.dirname path }; ./#{ File.basename path } -u #{ port }" do |pipe|
-          loop do 
-            if response = pipe.gets
-              puts response
-              ready = true if response.match /ready/
-            end
+        Open3.popen3("#{@path} -u #{port}") do |stdin, stdout, stderr, thread|
+          stdout.each_line do |line|
+            puts line
+            ready = true if line.include? "server ready"
           end
+          stderr.each_line { |line| puts "\e[31m#{line.chop}\e[0m" }
         end
       end
-      sleep 0.01 until ready or !@thread.alive? or Time.now > timeout
-      sleep 0.01        # just to be shure
+
+      sleep 0.1 until Time.now > timeout || ready
+      raise SCError.new("could not boot scsynth") unless running?
+
       send "/g_new", 1  # default group
       self   
     end
 
     def running?
-      @thread and @thread.alive? ? true : false
+      @thread && @thread.alive?
     end
 
     def stop
@@ -121,24 +119,26 @@ module Scruby
 
     # Allocates either buffer or bus indices, should be consecutive
     def allocate kind, *elements
-      collection = instance_variable_get "@#{kind}"
+      collection, max_size = 
+        case kind
+        when :buffers
+          [buffers, @buffer_count]
+        when :control_buses
+          [control_buses, @control_bus_count]
+        when :audio_buses
+          [audio_buses, @audio_bus_count]
+        end
+      
       elements.flatten!
 
-      max_size = @opts[kind]
-      if collection.compact.size + elements.size > max_size
-        raise SCError, "No more indices available -- free some #{ kind } before allocating more."
-      end
+      raise SCError.new("No more indices available -- free some #{kind} before allocating.") if collection.compact.size + elements.size > max_size
 
       return collection.concat(elements) unless collection.index nil # just concat arrays if no nil item
 
       indices = []
-      collection.each_with_index do |item, index| # find n number of consecutive nil indices
+      collection.each_with_index do |item, index|
         break if indices.size >= elements.size
-        if item.nil?
-          indices << index
-        else
-          indices.clear
-        end
+        item.nil? ? indices.push(index) : indices.clear
       end
 
       case 
@@ -147,7 +147,7 @@ module Scruby
       when collection.size + elements.size <= max_size
         collection.concat elements
       else
-        raise SCError, "No block of #{ elements.size } consecutive #{ kind } indices is available."
+        raise SCError.new("No block of #{elements.size} consecutive #{kind} indices is available.")
       end
     end
 
