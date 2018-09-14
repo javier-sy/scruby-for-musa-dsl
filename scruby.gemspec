@@ -6,9 +6,9 @@ Gem::Specification.new do |s|
   s.name        = "scruby"
   s.version     = Scruby::VERSION
   s.platform    = Gem::Platform::RUBY
-  s.authors     = ["Macario Ortega"]
-  s.email       = ["macarui@gmail.com"]
-  s.homepage    = "http://github.com/maca/scruby"
+  s.authors     = ['Macario Ortega', 'Nicola Bernardini']
+  s.email       = ['macarui@gmail.com', 'nicb@sme-ccppd.org']
+  s.homepage    = 'http://github.com/nicb/scruby'
   s.summary     = %q{SuperCollider client for Ruby}
   s.description = %q{SuperCollider client for Ruby}
 
@@ -16,7 +16,8 @@ Gem::Specification.new do |s|
 
   s.add_development_dependency 'rspec'
   s.add_development_dependency 'bundler'
-  s.add_dependency 'ruby-osc', '~> 0.3'
+  s.add_development_dependency 'byebug'
+  s.add_dependency 'ruby-osc', '~> 0.31'
   s.add_dependency 'arguments', '~> 0.6'
   s.add_dependency 'live', '~> 0.1'
 

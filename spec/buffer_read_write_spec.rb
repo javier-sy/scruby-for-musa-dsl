@@ -262,7 +262,7 @@ describe 'Buffer write Ugens' do
   
   describe Tap, 'single input' do
     before do
-      @inputs    = 5, 1, 0, SampleRate.ir.neg * 3, 1, 0
+      @inputs    = 5, 1, 0, SampleRate.new.neg * 3, 1, 0
       @buff_ugen = Tap.ar( 5, 2, 3 ).first.source
     end
 
@@ -281,7 +281,7 @@ describe 'Buffer write Ugens' do
   
   describe Tap, 'single input' do
     before do
-      @inputs    = 5, 1, 0, SampleRate.ir.neg * 3, 1, 0
+      @inputs    = 5, 1, 0, SampleRate.new.neg * 3, 1, 0
       @channels  = 1
       @proxies   = Tap.ar( 5, @channels, 3 )
     end
@@ -305,7 +305,7 @@ describe 'Buffer write Ugens' do
   
   describe Tap, 'multi input' do
     before do
-      @inputs    = 5, 1, 0, SampleRate.ir.neg * 3, 1, 0
+      @inputs    = 5, 1, 0, SampleRate.new.neg * 3, 1, 0
       @channels  = 4
       @proxies   = Tap.ar( 5, @channels, 3 )
     end
