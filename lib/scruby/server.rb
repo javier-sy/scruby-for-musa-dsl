@@ -20,7 +20,7 @@ module Scruby
   end
 
   class Server
-    attr_reader :host, :port, :path, :buffers, :control_buses, :audio_buses
+    attr_reader :host, :port, :path, :buffers, :control_buses, :audio_buses, :log
     DEFAULTS = { :buffers => 1024, :control_buses => 4096, :audio_buses => 128, :audio_outputs => 8, :audio_inputs => 8, 
       :host => 'localhost', :port => 57111, :path => '/Applications/SuperCollider/SuperCollider.app/Contents/Resources/scsynth'
       }
@@ -57,6 +57,7 @@ module Scruby
       @buffers       = []
       @control_buses = []
       @audio_buses   = []
+      @log           = Queue.new
 
       @client        = Client.new port, host
       # Bus.audio self, @audio_output_count # register hardware buses
@@ -75,6 +76,7 @@ module Scruby
         Open3.popen3("#{@path} -u #{port}") do |stdin, stdout, stderr, thread|
           stdout.each_line do |line|
             puts line
+            self.log.push line
             ready = true if line.include? "server ready"
           end
           stderr.each_line { |line| puts "\e[31m#{line.chop}\e[0m" }

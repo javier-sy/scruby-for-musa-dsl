@@ -4,7 +4,7 @@ PATH
     scruby (0.2.7.3)
       arguments (~> 0.6)
       live (~> 0.1)
-      ruby-osc (~> 0.31)
+      ruby-osc (~> 0.40)
 
 GEM
   remote: http://rubygems.org/
@@ -46,8 +46,8 @@ GEM
       diff-lcs (>= 1.2.0, < 2.0)
       rspec-support (~> 3.8.0)
     rspec-support (3.8.0)
-    ruby-osc (0.31.0)
-      eventmachine (>= 0.12.8)
+    ruby-osc (0.40.0)
+      eventmachine (~> 1.2)
     ruby2ruby (1.1.9)
       ParseTree
       hoe (>= 1.5.3)
