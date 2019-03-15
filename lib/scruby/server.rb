@@ -1,6 +1,6 @@
 require 'open3'
 
-module Scruby4MusaDSL
+module Scruby
   include OSC
 
   TrueClass.send :include, OSC::OSCArgument
@@ -21,9 +21,14 @@ module Scruby4MusaDSL
 
   class Server
     attr_reader :host, :port, :path, :buffers, :control_buses, :audio_buses, :log
-    DEFAULTS = { :buffers => 1024, :control_buses => 4096, :audio_buses => 128, :audio_outputs => 8, :audio_inputs => 8,
-      :host => 'localhost', :port => 57111, :path => '/Applications/SuperCollider/SuperCollider.app/Contents/Resources/scsynth'
-      }
+
+    DEFAULTS = {
+      buffers: 1024,
+      control_buses: 4096, audio_buses: 128,
+      audio_outputs: 8, audio_inputs: 8,
+      host: 'localhost', port: 57111,
+      path: '/Applications/SuperCollider/SuperCollider.app/Contents/Resources/scsynth'
+    }.freeze
 
     # Initializes and registers a new Server instance and sets the host and port for it.
     # The server is a Ruby representation of scsynth which can be a local binary or a remote

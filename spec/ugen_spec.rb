@@ -1,17 +1,18 @@
-require File.expand_path(File.dirname(__FILE__)) + "/helper"
+require_relative 'helper'
+
 require 'yaml'
 
-require "scruby/control_name"
-require "scruby/env"
-require "scruby/ugens/ugen"
-require "scruby/ugens/ugen_operations"
-require "scruby/ugens/operation_ugens"
-require "scruby/core_ext/object"
-require "scruby/core_ext/numeric"
-require "scruby/core_ext/string"
-require "scruby-for-musa-dsl/core_ext/fixnum"
-require "scruby/core_ext/array"
-require "scruby/core_ext/delegator_array"
+require 'scruby/control_name'
+require 'scruby/env'
+require 'scruby/ugens/ugen'
+require 'scruby/ugens/ugen_operations'
+require 'scruby/ugens/operation_ugens'
+require 'scruby/core_ext/object'
+require 'scruby/core_ext/numeric'
+require 'scruby/core_ext/string'
+require 'scruby/core_ext/numeric'
+require 'scruby/core_ext/array'
+require 'scruby/core_ext/delegator_array'
 
 
 include Scruby

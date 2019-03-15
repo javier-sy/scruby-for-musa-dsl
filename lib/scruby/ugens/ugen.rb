@@ -1,4 +1,4 @@
-module Scruby4MusaDSL
+module Scruby
   module Ugens
       # All ugens inherit from this "abstract" class
       #
@@ -90,7 +90,7 @@ module Scruby4MusaDSL
       end
 
       def collect_constants #:nodoc:
-        @inputs.send( :collect_constants )
+        @inputs.send(:collect_constants)
       end
 
       def input_specs synthdef #:nodoc:

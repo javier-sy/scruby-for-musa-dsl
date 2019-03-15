@@ -1,4 +1,4 @@
-module Scruby4MusaDSL
+module Scruby
   module Bus
     attr_accessor :main_bus
     attr_reader :server, :channels

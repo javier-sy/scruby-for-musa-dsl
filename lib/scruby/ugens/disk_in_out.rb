@@ -1,4 +1,4 @@
-module Scruby4MusaDSL
+module Scruby
   module Ugens
     class DiskOut < Ugen
       def output_specs; []; end
@@ -23,10 +23,9 @@ module Scruby4MusaDSL
     class VDiskIn < Ugen
       include MultiOut
       class << self
-        def ar channels, bufnum, rate = 1, loop = 0, send_id = 0
+        def ar channels, bufnum, rate: 1, loop: 0, send_id: 0
           new :audio, channels, bufnum, rate, loop, send_id
         end
-        named_args_for :ar
       end
     end
   end

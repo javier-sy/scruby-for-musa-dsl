@@ -1,12 +1,9 @@
-require File.expand_path(File.dirname(__FILE__)) + "/helper"
-
-require "scruby/control_name"
-require "scruby/env"
-require "scruby/ugens/ugen"
-require "scruby/ugens/ugen_operations"
-require "scruby/ugens/operation_ugens"
-require "scruby/ugens/ugens"
-
+require 'scruby/control_name'
+require 'scruby/env'
+require 'scruby/ugens/ugen'
+require 'scruby/ugens/ugen_operations'
+require 'scruby/ugens/operation_ugens'
+require 'scruby/ugens/ugens'
 
 module UgenTest
 end
@@ -17,11 +14,10 @@ end
 include Scruby
 include Ugens
 
-
 describe Ugens do
 
   before do
-    @udefs = YAML::load( File.open( "#{ File.dirname __FILE__ }/../lib/scruby-for-musa-dsl/ugens/ugen_defs.yaml" ) )
+    @udefs = YAML::load( File.open( "#{ File.dirname __FILE__ }/../lib/scruby/ugens/ugen_defs.yaml" ) )
   end
 
   it 'should define Ugen classes' do

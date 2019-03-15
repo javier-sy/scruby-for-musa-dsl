@@ -1,4 +1,4 @@
-module Scruby4MusaDSL
+module Scruby
   module Ugens
     module MultiOut #:nodoc:
       def self.included base

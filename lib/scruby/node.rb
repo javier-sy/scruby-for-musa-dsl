@@ -1,4 +1,4 @@
-module Scruby4MusaDSL
+module Scruby
   class Node
     @@base_id = 999
     attr_reader :servers, :group, :id

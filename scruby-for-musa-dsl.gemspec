@@ -1,17 +1,17 @@
 # -*- encoding: utf-8 -*-
-require_relative 'lib/scruby-for-musa-dsl/version'
+require_relative 'lib/scruby/version'
 
 Gem::Specification.new do |s|
   s.name        = "scruby-for-musa-dsl"
-  s.version     = Scruby4MusaDSL::VERSION
+  s.version     = Scruby::VERSION
   s.platform    = Gem::Platform::RUBY
   s.authors     = ['Javier Sánchez Yeste']
   s.email       = ['javier.sy@gmail.com']
-  s.homepage    = 'https://github.com/javier-sy/scruby-for-musa-dsl'
+  s.homepage    = 'https://github.com/javier-sy/scruby'
   s.summary     = %q{Ruby SuperCollider client for Musa-DSL based on scruby by Macario Ortega}
   s.description = %q{Ruby SuperCollider client for Musa-DSL based on scruby by Macario Ortega}
 
-  s.rubyforge_project = "scruby-for-musa-dsl"
+  s.rubyforge_project = 'scruby-for-musa-dsl'
 
   s.add_development_dependency 'rspec'
   s.add_development_dependency 'bundler'

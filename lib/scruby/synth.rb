@@ -1,4 +1,4 @@
-module Scruby4MusaDSL
+module Scruby
   class Synth < Node
     attr_reader :name
 

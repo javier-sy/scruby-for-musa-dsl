@@ -1,4 +1,4 @@
-module Scruby4MusaDSL
+module Scruby
   def expand_path path
     path = "~/Scruby/#{ path }" unless path.match %r{^(?:/|~)}
     File.expand_path path
@@ -83,8 +83,9 @@ module Scruby4MusaDSL
     end
 
     def buffnum
-       @server.buffers.index self
+      @server.buffers.index self
     end
+
     alias :as_ugen_input :buffnum
     alias :index         :buffnum
     # alias :as_control_input :buffnum
@@ -111,37 +112,35 @@ module Scruby4MusaDSL
     end
 
     class << self
-      def allocate server, frames = -1, channels = 1, &message
+      def allocate server, frames: -1, channels: 1, &message
         new(server, frames, channels).allocate &message
       end
 
-      def cue_sound_file server, path, start, channels = 2, buff_size = 32768, &message
-        allocate server, buff_size, channels do |buffer|
+      def cue_sound_file server, path, start, channels: 2, buff_size: 32768, &message
+        allocate server, frames: buff_size, channels: channels do |buffer|
           message ||= 0
           ['/b_read', buffer.buffnum, expand_path(path), start, buff_size, 0, true, message.value(buffer)]
         end
       end
 
       # Allocate a buffer and immediately read a soundfile into it.
-      def read server, path, start = 0, frames = -1, &message
+      def read server, path, start: 0, frames: -1, &message
         buffer = new server, &message
         buffer.allocate_and_read expand_path(path), start, frames
       end
 
-      def read_channel server, path, start = 0, frames = -1, channels = [], &message
+      def read_channel server, path, start: 0, frames: -1, channels: [], &message
         new(server, frames, channels).allocate_read_channel expand_path(path), start, frames, channels, &message
       end
 
-      def alloc_consecutive buffers, server, frames = -1, channels = 1, &message
-        buffers = Array.new(buffers){ new server, frames, channels }
+      def alloc_consecutive buffers, server, frames: -1, channels: 1, &message
+        buffers = Array.new(buffers) { new server, frames, channels }
         server.allocate :buffers, buffers
         message ||= 0
         buffers.each do |buff|
           server.send '/b_alloc', buff.buffnum, frames, channels, message.value(buff)
         end
       end
-
-      named_arguments_for :allocate, :read, :cue_sound_file, :alloc_consecutive, :read_channel
 
       # readNoUpdate
       # loadCollection

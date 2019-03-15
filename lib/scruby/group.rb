@@ -1,4 +1,4 @@
-module Scruby4MusaDSL
+module Scruby
   class Group < Node
     def free_all
       send '/g_freeAll', self.id

@@ -1,13 +1,11 @@
-require File.expand_path(File.dirname(__FILE__)) + "/helper"
+require_relative 'helper'
 
-
-require "scruby/core_ext/typed_array" 
-require "scruby/node"
-require "scruby/bus"
-require "scruby/group"
-require "scruby/synth"
-require "scruby/server"
-require File.join( File.expand_path(File.dirname(__FILE__)), "server")
+require 'scruby/core_ext/typed_array'
+require 'scruby/node'
+require 'scruby/bus'
+require 'scruby/group'
+require 'scruby/synth'
+require 'scruby/server'
 
 include Scruby
 
@@ -29,7 +27,7 @@ describe Synth do
   before do
     @server.flush
   end
-  
+
   describe 'instantiation with node target' do
     before do
       Node.reset!

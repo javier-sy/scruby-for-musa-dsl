@@ -1,4 +1,4 @@
-module Scruby4MusaDSL
+module Scruby
   module Ugens
     class In < Ugen
       include MultiOut

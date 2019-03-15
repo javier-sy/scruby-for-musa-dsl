@@ -1,4 +1,4 @@
-module Scruby4MusaDSL
+module Scruby
   module Ugens
     # This module enables Ugen operations for Ugens, Numeric and Arrays, when any instance of this classes executes an operation with an Ugen a BinaryUgenOp
     # is instantiated where both objects are the inputs of the operation, an UnaryUgenOp is instantiated for unary operations
@@ -52,7 +52,7 @@ module Scruby4MusaDSL
       end
     end
 
-    [Ugen, Integer, Float].each{ |k| k.send :include, UgenOperations }
+    [Ugen, Integer, Float].each { |k| k.send :include, UgenOperations }
   end
 end
 

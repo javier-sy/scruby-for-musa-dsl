@@ -1,4 +1,4 @@
-module Scruby4MusaDSL
+module Scruby
   class Env
     attr_accessor :levels, :times, :curves, :release_node, :array
     SHAPE_NAMES = {

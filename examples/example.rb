@@ -1,4 +1,4 @@
-scruby = "#{File.expand_path( File.join( File.dirname( __FILE__), '..', 'scruby-for-musa-dsl' )  )}"
+scruby = "#{File.expand_path( File.join( File.dirname( __FILE__), '..', 'scruby' )  )}"
 require scruby
 s = Server.new('localhost', 57140)
 s.boot

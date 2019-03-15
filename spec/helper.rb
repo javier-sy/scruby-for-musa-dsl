@@ -2,15 +2,13 @@ require 'rspec'
 require 'yaml'
 require 'ruby-osc'
 
-require 'pry'
-
-require 'scruby-for-musa-dsl/core_ext/object'
-require 'scruby-for-musa-dsl/core_ext/array'
-require 'scruby-for-musa-dsl/core_ext/numeric'
-require 'scruby-for-musa-dsl/core_ext/integer'
-require 'scruby-for-musa-dsl/core_ext/proc'
-require 'scruby-for-musa-dsl/core_ext/string'
-require 'scruby-for-musa-dsl/core_ext/symbol'
+require 'scruby/core_ext/object'
+require 'scruby/core_ext/array'
+require 'scruby/core_ext/numeric'
+require 'scruby/core_ext/integer'
+require 'scruby/core_ext/proc'
+require 'scruby/core_ext/string'
+require 'scruby/core_ext/symbol'
 
 RSpec.configure do |config|
   config.expect_with :rspec do |expectations|
@@ -18,7 +16,7 @@ RSpec.configure do |config|
   end
 end
 
-module Scruby4MusaDSL
+module Scruby
   module Test
     SOUND_DIR = File.expand_path(File.join('..', 'fixtures', 'sounds'), __FILE__)
     DEFAULT_SLEEP = 0.1 # 100 msec for threads to sync up

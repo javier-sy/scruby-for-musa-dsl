@@ -1,6 +1,6 @@
 source "http://rubygems.org"
 
-# Specify your gem's dependencies in scruby-for-musa-dsl.gemspec
+# Specify your gem's dependencies in scruby.gemspec
 gemspec
 
 gem 'pry'

@@ -1,6 +1,6 @@
-require File.expand_path(File.dirname(__FILE__)) + "/helper"
+require_relative 'helper'
 
-require "scruby-for-musa-dsl"
+require 'scruby'
 
 include Scruby
 include Ugens

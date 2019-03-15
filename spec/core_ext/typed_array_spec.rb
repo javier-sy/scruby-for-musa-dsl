@@ -1,5 +1,6 @@
-require File.expand_path(File.dirname(__FILE__)) + "/../helper"
-require 'scruby-for-musa-dsl/core_ext/typed_array'
+require_relative '../helper'
+
+require 'scruby/core_ext/typed_array'
 
 class Type
 end

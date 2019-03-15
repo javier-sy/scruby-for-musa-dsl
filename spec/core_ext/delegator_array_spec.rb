@@ -1,15 +1,15 @@
-require File.expand_path(File.dirname(__FILE__)) + "/../helper"
+require_relative '../helper'
 
-require 'scruby-for-musa-dsl/core_ext/array'
-require 'scruby-for-musa-dsl/core_ext/delegator_array'
-require 'scruby-for-musa-dsl/env'
-require 'scruby-for-musa-dsl/control_name'
-require 'scruby-for-musa-dsl/ugens/ugen'
-require 'scruby-for-musa-dsl/ugens/ugens'
-require 'scruby-for-musa-dsl/ugens/ugen_operations'
-require 'scruby-for-musa-dsl/ugens/operation_ugens'
+require 'scruby/core_ext/array'
+require 'scruby/core_ext/delegator_array'
+require 'scruby/env'
+require 'scruby/control_name'
+require 'scruby/ugens/ugen'
+require 'scruby/ugens/ugens'
+require 'scruby/ugens/ugen_operations'
+require 'scruby/ugens/operation_ugens'
 
-include Scruby4MusaDSL
+include Scruby
 include Ugens
 
 class MockUgen < Ugen

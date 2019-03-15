@@ -1,4 +1,4 @@
-module Scruby4MusaDSL
+module Scruby
   class SynthDef
     attr_reader :name, :children, :constants, :control_names
     # Creates a new SynthDef instance
