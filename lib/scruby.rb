@@ -21,6 +21,16 @@ require 'arguments'
 require 'ruby-osc'
 require 'eventmachine'
 require 'yaml'
+begin
+  require 'byebug'
+rescue LoadError
+end
+
+#
+# This a proper option initialization for whoever is using jack in a normal
+# (laptop) configuration. You may reset the variable to your taste.
+#
+ENV['SC_JACK_DEFAULT_OUTPUTS'] = 'system' unless ENV.keys.include?('SC_JACK_DEFAULT_OUTPUTS')
 
 $:.unshift(File.dirname(__FILE__)) unless $:.include?(File.dirname(__FILE__)) || $:.include?(File.expand_path(File.dirname(__FILE__)))
 
@@ -28,7 +38,7 @@ require "scruby/version"
 
 require "scruby/core_ext/object"
 require "scruby/core_ext/array"
-require "scruby/core_ext/fixnum"
+require "scruby/core_ext/integer"
 require "scruby/core_ext/numeric"
 require "scruby/core_ext/proc"
 require "scruby/core_ext/string"

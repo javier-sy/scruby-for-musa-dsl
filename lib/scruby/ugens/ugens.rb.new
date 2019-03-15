@@ -46,7 +46,7 @@ module Scruby
           rname = rate_name[rate]
           <<-RUBY_EVAL
             def new #{ args.collect{ |a, v| "#{ a } = #{ v.inspect }"  }.join(', ') }
-              super #{ args.unshift([rate.inspect]).collect{ |a| a.first }.join(', ') }
+                    super :#{rname} #{ args.size > 0 ? ', ' + args.collect{ |a| a.first  }.join(', ') : '' }
             end
           RUBY_EVAL
         else
