@@ -5,3 +5,4 @@ pkg/*
 *.swo
 .byebug_history
 /tmp/
+.idea/
