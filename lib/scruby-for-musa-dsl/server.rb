@@ -1,16 +1,16 @@
 require 'open3'
 
-module Scruby 
+module Scruby4MusaDSL
   include OSC
-  
+
   TrueClass.send :include, OSC::OSCArgument
   TrueClass.send(:define_method, :to_osc_type){ 1 }
-  
+
   FalseClass.send :include, OSC::OSCArgument
   FalseClass.send(:define_method, :to_osc_type){ 0 }
-  
+
   Hash.send :include, OSC::OSCArgument
-  Hash.send :define_method, :to_osc_type do 
+  Hash.send :define_method, :to_osc_type do
     self.to_a.collect{ |pair| pair.collect{ |a| OSC.coerce_argument a } }
   end
 
@@ -21,18 +21,18 @@ module Scruby
 
   class Server
     attr_reader :host, :port, :path, :buffers, :control_buses, :audio_buses, :log
-    DEFAULTS = { :buffers => 1024, :control_buses => 4096, :audio_buses => 128, :audio_outputs => 8, :audio_inputs => 8, 
+    DEFAULTS = { :buffers => 1024, :control_buses => 4096, :audio_buses => 128, :audio_outputs => 8, :audio_inputs => 8,
       :host => 'localhost', :port => 57111, :path => '/Applications/SuperCollider/SuperCollider.app/Contents/Resources/scsynth'
       }
 
     # Initializes and registers a new Server instance and sets the host and port for it.
-    # The server is a Ruby representation of scsynth which can be a local binary or a remote    
+    # The server is a Ruby representation of scsynth which can be a local binary or a remote
     # server already running.
     # Server class keeps an array with all the instantiated servers
-    # 
-    # For more info 
+    #
+    # For more info
     #   $ man scsynth
-    # 
+    #
     # @param [Hash] opts the options to create a message with.
     # @option opts [String] :path ('scsynt' on Linux, '/Applications/SuperCollider/SuperCollider.app/Contents/Resources/scsynth' on Mac) scsynth binary path
     # @option opts [String] :host ('localhost') SuperCollider Server address
@@ -42,7 +42,7 @@ module Scruby
     # @option opts [Fixnum] :audio_output_count (8) Reserved buses for hardware output, indices start at 0
     # @option opts [Fixnum] :audio_input_count (8) Reserved buses for hardware input, indices starting from the number of audio outputs
     # @option opts [Fixnum] :buffer_count (1024) Number of available sample buffers
-    # 
+    #
     def initialize opts = {}
       @path               = opts.delete(:path) || (%x(which scsynth).empty? ? '/Applications/SuperCollider/scsynth' : 'scsynth')
       @host               = opts.delete(:host) || 'localhost'
@@ -65,8 +65,8 @@ module Scruby
       self.class.all << self
     end
 
-    # Boots the local binary of the scsynth forking a process, it will rise a SCError if the scsynth 
-    # binary is not found in path. 
+    # Boots the local binary of the scsynth forking a process, it will rise a SCError if the scsynth
+    # binary is not found in path.
     # The default path can be overriden using Server.scsynt_path=('path')
     def boot
       raise SCError.new("scsyth already running on port #{port}") if running?
@@ -87,7 +87,7 @@ module Scruby
       raise SCError.new("could not boot scsynth") unless running?
 
       send "/g_new", 1  # default group
-      self   
+      self
     end
 
     def running?
@@ -126,7 +126,7 @@ module Scruby
 
     # Allocates either buffer or bus indices, should be consecutive
     def allocate kind, *elements
-      collection, max_size = 
+      collection, max_size =
         case kind
         when :buffers
           [buffers, @buffer_count]
@@ -135,7 +135,7 @@ module Scruby
         when :audio_buses
           [audio_buses, @audio_bus_count]
         end
-      
+
       elements.flatten!
 
       raise SCError.new("No more indices available -- free some #{kind} before allocating.") if collection.compact.size + elements.size > max_size
@@ -148,7 +148,7 @@ module Scruby
         item.nil? ? indices.push(index) : indices.clear
       end
 
-      case 
+      case
       when indices.size >= elements.size
         collection[indices.first, elements.size] = elements
       when collection.size + elements.size <= max_size

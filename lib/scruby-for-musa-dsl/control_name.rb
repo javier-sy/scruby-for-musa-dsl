@@ -1,4 +1,4 @@
-module Scruby
+module Scruby4MusaDSL
   class ControlName #:nodoc:
     attr_accessor :name, :value, :rate, :index
     RATES = { 'n_' => :noncontrol, 'i_' => :scalar, 'k_' => :control, 't_' => :trigger }

@@ -1,4 +1,4 @@
-module Scruby
+module Scruby4MusaDSL
   module Ugens
     class DiskOut < Ugen
       def output_specs; []; end

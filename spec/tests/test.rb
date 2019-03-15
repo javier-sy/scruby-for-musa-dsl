@@ -4,7 +4,7 @@
 # - Replace OSC / fix hanging
 # - Fix specs
 # - Add instructions (e.g. scsyth location)
-require 'scruby'
+require 'scruby-for-musa-dsl'
 require 'pry'
 
 s = Server.new

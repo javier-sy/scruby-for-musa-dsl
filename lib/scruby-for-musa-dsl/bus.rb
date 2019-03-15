@@ -1,4 +1,4 @@
-module Scruby
+module Scruby4MusaDSL
   module Bus
     attr_accessor :main_bus
     attr_reader :server, :channels
@@ -6,7 +6,7 @@ module Scruby
     def initialize server, channels = 1, main_bus = self, hardware_out = false
       @server, @channels, @main_bus, @hardware_out = server, channels, main_bus, hardware_out
     end
-    
+
     # def audio_out?
     #   index < @server.instance_variable_get(:@opts)[:audio_outputs]
     # end
@@ -42,14 +42,14 @@ module Scruby
           message_args.push(chan).push(val) if chan and val
         end
         if args.size > channels
-          warn "You tried to set #{args.size} values for bus #{index} that only has #{channels} channels, extra values are ignored." 
+          warn "You tried to set #{args.size} values for bus #{index} that only has #{channels} channels, extra values are ignored."
         end
         @server.send '/c_set', *message_args
       end
 
       def fill value, channels = @channels
         if channels > @channels
-          warn "You tried to set #{channels} values for bus #{index} that only has #{@channels} channels, extra values are ignored." 
+          warn "You tried to set #{channels} values for bus #{index} that only has #{@channels} channels, extra values are ignored."
         end
         @server.send '/c_fill', index, channels.min(@channels), value
       end

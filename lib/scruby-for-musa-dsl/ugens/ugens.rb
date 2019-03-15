@@ -1,33 +1,33 @@
-module Scruby
+module Scruby4MusaDSL
   module Ugens
 
     #
     # Default SuperCollider Ugens definitions are stored in the ugen_defs.yml file and are defined as Ruby classes on the fly, the yml format is:
-    # 
-    #   NewUgen: 
-    #     :control: 
+    #
+    #   NewUgen:
+    #     :control:
     #     - - :input
-    #       - 
+    #       -
     #     - - :freq
     #       - 440
-    #     :audio: 
+    #     :audio:
     #     - - :input
-    #       - 
+    #       -
     #     - - :freq
     #       - 440
     #
     # To define a Ruby class corresponding to an Ugen +name+ should be passed and a hash of +rates+, inputs and default values, default values can be nil
-    # 
+    #
     #   Ugens.define_ugen( 'NewUgen', {:control => [[:input, nil], [:freq, 440]], :audio => [[:input, nil], [:freq, 440]]} )
     #
     # The previous is equivalent as the following ruby code:
-    # 
+    #
     #   class NewUgen < Ugen
     #     class << self
     #       def kr( input, freq = 440 )
     #         new :control, input, freq
     #       end
-    #     
+    #
     #       def ar( input, freq = 440)
     #         new :audio, input, freq
     #       end
@@ -35,7 +35,7 @@ module Scruby
     #       named_arguments_for :ar, :kr
     #     end
     #   end
-    #       
+    #
     # In future versions Ugen definitions will be loaded from ~/Ugens or ~/.Ugens directories either as yml files or rb files
     #
     def self.define_ugen name, rates
@@ -46,7 +46,7 @@ module Scruby
           rname = rate_name[rate]
           <<-RUBY_EVAL
             def new #{ args.collect{ |a, v| "#{ a } = #{ v.inspect }"  }.join(', ') }
-                    super :#{rname} #{ args.size > 0 ? ', ' + args.collect{ |a| a.first  }.join(', ') : '' }
+              super #{ args.unshift([rate.inspect]).collect{ |a| a.first }.join(', ') }
             end
           RUBY_EVAL
         else
@@ -56,7 +56,7 @@ module Scruby
           assigns = []
           args.each_with_index do |arg, index|
             key, val = arg
-            assigns << %{  
+            assigns << %{
               #{ key } = opts[:#{ key }] || args[#{ index }] || #{ val }
               raise( ArgumentError.new("`#{ key }` value must be provided") ) unless #{ key }
             }
@@ -89,7 +89,7 @@ module Scruby
       # # TODO: Load from ~/Ugens directory
     end
 
-    YAML::load( File.open( File.dirname(__FILE__) + "/ugen_defs.yaml" ) ).each_pair do |key, value| 
+    YAML::load( File.open( File.dirname(__FILE__) + "/ugen_defs.yaml" ) ).each_pair do |key, value|
       self.define_ugen key, value
     end
   end

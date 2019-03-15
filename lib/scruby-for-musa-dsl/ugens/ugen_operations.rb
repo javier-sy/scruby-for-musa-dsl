@@ -1,15 +1,15 @@
-module Scruby
+module Scruby4MusaDSL
   module Ugens
-    # This module enables Ugen operations for Ugens, Numeric and Arrays, when any instance of this classes executes an operation with an Ugen a BinaryUgenOp 
+    # This module enables Ugen operations for Ugens, Numeric and Arrays, when any instance of this classes executes an operation with an Ugen a BinaryUgenOp
     # is instantiated where both objects are the inputs of the operation, an UnaryUgenOp is instantiated for unary operations
     # This are the permited operations:
     #
-    # Binary: 
-    # +, -, *, div, /, mod, <=, >=, minimum, maximum, lcm, gcd, round, roundUp, trunc, atan2, hypot, hypotApx, pow, leftShift, rightShift, unsignedRightShift, ring1, ring2, ring3, ring4, difsqr, sumsqr, sqrsum, sqrdif, absdif, thresh, amclip, scaleneg, clip2, excess, fold2, wrap2, rrand and exprand 
-    # 
+    # Binary:
+    # +, -, *, div, /, mod, <=, >=, minimum, maximum, lcm, gcd, round, roundUp, trunc, atan2, hypot, hypotApx, pow, leftShift, rightShift, unsignedRightShift, ring1, ring2, ring3, ring4, difsqr, sumsqr, sqrsum, sqrdif, absdif, thresh, amclip, scaleneg, clip2, excess, fold2, wrap2, rrand and exprand
+    #
     # Unary:
-    # neg, bitNot, abs, asFloat, ceil, floor, frac, sign, squared, cubed, sqrt, exp, reciprocal, midicps, cpsmidi, midiratio, ratiomidi, dbamp, ampdb, octcps, cpsoct, log, log2, log10, sin, cos, tam, asin, acos, atan, sinh, cosh, tanh, rand, rand2, linrand, bilinrand, sum3rand, distort, softclip, coin, rectWindow, hanWindow, welWindow, triWindow, ramp and scurve 
-    # 
+    # neg, bitNot, abs, asFloat, ceil, floor, frac, sign, squared, cubed, sqrt, exp, reciprocal, midicps, cpsmidi, midiratio, ratiomidi, dbamp, ampdb, octcps, cpsoct, log, log2, log10, sin, cos, tam, asin, acos, atan, sinh, cosh, tanh, rand, rand2, linrand, bilinrand, sum3rand, distort, softclip, coin, rectWindow, hanWindow, welWindow, triWindow, ramp and scurve
+    #
     module UgenOperations
       p "Loading operation_indices.yaml"
       f = File.open( File.dirname(__FILE__) + "/operation_indices.yaml" )
@@ -20,7 +20,7 @@ module Scruby
 
       def self.included klass
         # Define unary operations
-        UNARY.each_key do |op| 
+        UNARY.each_key do |op|
           define_method(op){ UnaryOpUGen.new op, self } unless klass.instance_methods.include? op
         end
 

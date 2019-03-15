@@ -1,4 +1,4 @@
-module Scruby
+module Scruby4MusaDSL
   class Synth < Node
     attr_reader :name
 
@@ -28,19 +28,19 @@ module Scruby
       def after target, name, args = {}
         new name, args, target, :after
       end
-      
+
       def before target, name, args = {}
         new name, args, target, :before
       end
-      
+
       def head target, name, args = {}
         new name, args, target, :head
       end
-      
+
       def tail target, name, args = {}
         new name, args, target, :tail
       end
-      
+
       def replace target, name, args = {}
         new name, args, target, :replace
       end
