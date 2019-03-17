@@ -5,28 +5,32 @@ module Scruby
 
     ACTIONS = [:head, :tail, :before, :after, :replace]
 
-    def initialize *args
+    def initialize(*args)
       args.flatten!
       args.compact!
-      args.each{ |s| raise TypeError.new("#{s} should be instance of Server") unless Server === s }
-      @id      = args.pop if args.last.is_a? Integer
+      args.each { |s| raise TypeError, "#{s} should be instance of Server" unless Server === s }
+
+      @id = args.pop if args.last.is_a? Integer
       @servers = args.empty? ? Server.all : args
-      @id    ||= @@base_id += 1
+
+      @id ||= @@base_id += 1
     end
 
-    def set args = {}
-      send '/n_set', self.id, *args.to_a.flatten
+    def set(**args)
+      send '/n_set', id, *args.to_a.flatten
       self
     end
 
     def free
-      send '/n_free', self.id
-      @group, @playing, @running = nil, false, false
+      send '/n_free', id
+      @group = nil
+      @playing = false
+      @running = false
       self
     end
 
-    def run run = true
-      send '/n_run', self.id, run
+    def run(run = true)
+      send '/n_run', id, run
       self
     end
 
@@ -36,35 +40,43 @@ module Scruby
     # Nodes within the Group. Note that with mapMsg if you mix audio and control rate busses you will get an Array of two messages
     # rather than a single message. Integer bus indices are assumed to refer to control buses. To map a control to an audio bus, you
     # must use a Bus object.
-    def map args
-      control, audio, content = ['/n_mapn', self.id], ['/n_mapan', self.id], []
-      args    = args.to_a.each do |param, bus|
+    def map(args)
+      control = ['/n_mapn', id]
+      audio = ['/n_mapan', id]
+      content = []
+
+      args = args.to_a.each do |param, bus|
         raise ArgumentError, "`#{ control }` is not a Bus" unless bus.kind_of? Bus
+
         array = audio   if bus.rate == :audio
         array = control if bus.rate == :control
-        array.push param, bus.index, bus.channels if array
+
+        array&.push param, bus.index, bus.channels
       end
+
       content << control unless control.empty?
       content << audio   unless audio.empty?
+
       send_bundle nil, *content
+
       self
     end
 
     # mapn
     def trace
-      send '/n_trace', self.id
+      send '/n_trace', id
       self
     end
 
     def move_before node
       @group = node.group
-      send '/n_before', self.id, node.id
+      send '/n_before', id, node.id
       self
     end
 
     def move_after node
       @group = node.group
-      send '/n_after', self.id, node.id
+      send '/n_after', id, node.id
       self
     end
 
@@ -78,8 +90,11 @@ module Scruby
     #   @server.each{ |s| s.send '/n_after', self.id, node.id }
     # end
 
-    def playing?; @playing || false; end
-    alias :running? :playing?
+    def playing?
+      @playing || false
+    end
+
+    alias running? playing?
 
     # Reset the node count
     def self.reset!
@@ -87,15 +102,15 @@ module Scruby
     end
 
     # Sends a bundle to all registered +servers+ for this node
-    def send_bundle timestamp, *messages
-      bundle = Bundle.new( timestamp, *messages.map{ |message| Message.new *message } )
-      @servers.each{ |s| s.send bundle  }
+    def send_bundle(timestamp, *messages)
+      bundle = Bundle.new(timestamp, *messages.map { |message| Message.new *message })
+      @servers.each { |s| s.send bundle }
     end
 
     # Sends a message to all registered +servers+ for this node
-    def send command, *args
-      message = Message.new command, *args
-      @servers.each{ |s| s.send message }
+    def send(command, *args)
+      message = Message.new(command, *args)
+      @servers.each { |s| s.send message }
       self
     end
   end

@@ -19,12 +19,12 @@ end
 module Scruby
   module Test
     SOUND_DIR = File.expand_path(File.join('..', 'fixtures', 'sounds'), __FILE__)
-    DEFAULT_SLEEP = 0.1 # 100 msec for threads to sync up
+    DEFAULT_SLEEP = 0.2 # 200 msec for threads to sync up
   end
 end
 
 def wait
-  sleep Scruby4MusaDSL::Test::DEFAULT_SLEEP
+  sleep Scruby::Test::DEFAULT_SLEEP
 end
 
 def unwind(queue)

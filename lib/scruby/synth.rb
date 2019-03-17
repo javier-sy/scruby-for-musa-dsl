@@ -2,13 +2,13 @@ module Scruby
   class Synth < Node
     attr_reader :name
 
-    def initialize name, servers
+    def initialize(name, servers)
       super servers
       @name = name.to_s
     end
 
     class << self
-      def new name, args = {}, target = nil, action = :head
+      def new(name, action: :head, target: nil, **args)
         case target
         when nil
           target_id, servers = 1, nil
@@ -25,26 +25,25 @@ module Scruby
         synth
       end
 
-      def after target, name, args = {}
-        new name, args, target, :after
+      def after(target, name, **args)
+        new name, action: :after, target: target, **args
       end
 
-      def before target, name, args = {}
-        new name, args, target, :before
+      def before(target, name, **args)
+        new name, action: :before, target: target, **args
       end
 
-      def head target, name, args = {}
-        new name, args, target, :head
+      def head(target, name, **args)
+        new name, action: :head, target: target, **args
       end
 
-      def tail target, name, args = {}
-        new name, args, target, :tail
+      def tail(target, name, **args)
+        new name, action: :tail, target: target, **args
       end
 
-      def replace target, name, args = {}
-        new name, args, target, :replace
+      def replace(target, name, **args)
+        new name, action: :replace, target: target, **args
       end
     end
-
   end
 end

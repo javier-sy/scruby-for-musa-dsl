@@ -3,8 +3,11 @@ module Scruby
     attr_accessor :main_bus
     attr_reader :server, :channels
 
-    def initialize server, channels = 1, main_bus = self, hardware_out = false
-      @server, @channels, @main_bus, @hardware_out = server, channels, main_bus, hardware_out
+    def initialize(server, channels: 1, main_bus: self, hardware_out: false)
+      @server = server
+      @channels = channels
+      @main_bus = main_bus
+      @hardware_out = hardware_out
     end
 
     # def audio_out?

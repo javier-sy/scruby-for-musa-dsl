@@ -307,7 +307,7 @@ describe 'Buffer write Ugens' do
     before do
       @inputs    = 5, 1, 0, SampleRate.new.neg * 3, 1, 0
       @channels  = 4
-      @proxies   = Tap.ar( 5, @channels, 3 )
+      @proxies   = Tap.ar(5, @channels, 3)
     end
 
     it "should have one proxy" do

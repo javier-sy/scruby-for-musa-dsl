@@ -4,31 +4,23 @@ module Scruby
   include OSC
 
   TrueClass.send :include, OSC::OSCArgument
-  TrueClass.send(:define_method, :to_osc_type){ 1 }
+  TrueClass.send(:define_method, :to_osc_type) { 1 }
 
   FalseClass.send :include, OSC::OSCArgument
-  FalseClass.send(:define_method, :to_osc_type){ 0 }
+  FalseClass.send(:define_method, :to_osc_type) { 0 }
 
   Hash.send :include, OSC::OSCArgument
   Hash.send :define_method, :to_osc_type do
-    self.to_a.collect{ |pair| pair.collect{ |a| OSC.coerce_argument a } }
+    self.to_a.collect { |pair| pair.collect { |a| OSC.coerce_argument(a) } }
   end
 
   Array.send(:include, OSC::OSCArgument)
-  Array.send( :define_method, :to_osc_type) do
+  Array.send(:define_method, :to_osc_type) do
     Blob.new Message.new(*self).encode
   end
 
   class Server
     attr_reader :host, :port, :path, :buffers, :control_buses, :audio_buses, :log
-
-    DEFAULTS = {
-      buffers: 1024,
-      control_buses: 4096, audio_buses: 128,
-      audio_outputs: 8, audio_inputs: 8,
-      host: 'localhost', port: 57111,
-      path: '/Applications/SuperCollider/SuperCollider.app/Contents/Resources/scsynth'
-    }.freeze
 
     # Initializes and registers a new Server instance and sets the host and port for it.
     # The server is a Ruby representation of scsynth which can be a local binary or a remote
@@ -38,73 +30,76 @@ module Scruby
     # For more info
     #   $ man scsynth
     #
-    # @param [Hash] opts the options to create a message with.
-    # @option opts [String] :path ('scsynt' on Linux, '/Applications/SuperCollider/SuperCollider.app/Contents/Resources/scsynth' on Mac) scsynth binary path
-    # @option opts [String] :host ('localhost') SuperCollider Server address
-    # @option opts [Fixnum] :port (57111) TCP port
-    # @option opts [Fixnum] :control_bus_count (4096) Number of buses for routing control data, indices start at 0
-    # @option opts [Fixnum] :audio_bus_count (128) Number of audio Bus channels for hardware output and input and internal routing
-    # @option opts [Fixnum] :audio_output_count (8) Reserved buses for hardware output, indices start at 0
-    # @option opts [Fixnum] :audio_input_count (8) Reserved buses for hardware input, indices starting from the number of audio outputs
-    # @option opts [Fixnum] :buffer_count (1024) Number of available sample buffers
-    #
-    def initialize opts = {}
-      @path               = opts.delete(:path) || (%x(which scsynth).empty? ? '/Applications/SuperCollider/scsynth' : 'scsynth')
-      @host               = opts.delete(:host) || 'localhost'
-      @port               = opts.delete(:port) || 57111
+    def initialize(path: nil, host: nil, port: nil,
+                   audio_outputs: nil, audio_inputs: nil,
+                   buffers: nil, control_buses: nil, audio_buses: nil, log: nil)
 
-      @audio_output_count = opts.delete(:audio_output_count) || 8
-      @audio_input_count  = opts.delete(:audio_input_count)  || 8
-      @buffer_count       = opts.delete(:buffer_count)       || 1024
-      @control_bus_count  = opts.delete(:control_bus_count)  || 4096
-      @audio_bus_count    = opts.delete(:audio_bus_count)    || 128
+      @path               = path || find_local_server()
+      @host               = host || 'localhost'
+      @port               = port || 57111
+
+      @audio_output_count = audio_outputs   || 8
+      @audio_input_count  = audio_inputs    || 8
+      @buffer_count       = buffers         || 1024
+      @control_bus_count  = control_buses   || 4096
+      @audio_bus_count    = audio_buses     || 128
 
       @buffers       = []
       @control_buses = []
       @audio_buses   = []
-      @log           = Queue.new
+      @log           = Queue.new if log
 
-      @client        = Client.new port, host
+      @client        = Client.new @port, @host
+
       # Bus.audio self, @audio_output_count # register hardware buses
       # Bus.audio self, @audio_input_count
-      self.class.all << self
+
+      Server.all << self
     end
 
     # Boots the local binary of the scsynth forking a process, it will rise a SCError if the scsynth
     # binary is not found in path.
-    # The default path can be overriden using Server.scsynt_path=('path')
     def boot
-      raise SCError.new("scsyth already running on port #{port}") if running?
+      raise SCError, 'scsynth not found in the given path' unless File.exists?(path)
+
+      if running?
+        warn "Server on port #{port} already running"
+        return self
+      end
 
       ready, timeout = false, Time.now + 2
+
       @thread = Thread.new do
-        Open3.popen3("#{@path} -u #{port}") do |stdin, stdout, stderr, thread|
+        Open3.popen3("#{@path} -u #{port}") do |_, stdout, stderr, _|
           stdout.each_line do |line|
             puts line
-            self.log.push line
-            ready = true if line.include? "server ready"
+            log&.push line
+            ready = true if line.include? 'server ready'
           end
           stderr.each_line { |line| puts "\e[31m#{line.chop}\e[0m" }
         end
       end
 
       sleep 0.1 until Time.now > timeout || ready
-      raise SCError.new("could not boot scsynth") unless running?
 
-      send "/g_new", 1  # default group
+      raise SCError, 'could not boot scsynth' unless running?
+
+      send '/g_new', 1  # default group
+
       self
     end
 
     def running?
-      @thread && @thread.alive?
+      @thread&.alive?
     end
 
     def stop
-      send "/g_freeAll", 0
-      send "/clearSched"
-      send "/g_new", 1
+      send '/g_freeAll', 0
+      send '/clearSched'
+      send '/g_new', 1
     end
-    alias :panic :stop
+
+    alias panic stop
 
     # Sends the /quit OSC signal to the scsynth
     def quit
@@ -115,22 +110,22 @@ module Scruby
 
     # Sends an OSC command or +Message+ to the scsyth server.
     # E.g. +server.send('/dumpOSC', 1)+
-    def send message, *args
+    def send(message, *args)
       message = Message.new message, *args unless Message === message or Bundle === message
       @client.send message
     end
 
-    def send_bundle timestamp = nil, *messages
+    def send_bundle(timestamp = nil, *messages)
       send Bundle.new( timestamp, *messages.map{ |message| Message.new *message  } )
     end
 
     # Encodes and sends a SynthDef to the scsynth server
-    def send_synth_def synth_def
+    def send_synth_def(synth_def)
       send Bundle.new( nil, Message.new('/d_recv', Blob.new(synth_def.encode), 0) )
     end
 
     # Allocates either buffer or bus indices, should be consecutive
-    def allocate kind, *elements
+    def allocate(kind, *elements)
       collection, max_size =
         case kind
         when :buffers
@@ -143,23 +138,23 @@ module Scruby
 
       elements.flatten!
 
-      raise SCError.new("No more indices available -- free some #{kind} before allocating.") if collection.compact.size + elements.size > max_size
+      raise SCError, "No more indices available -- free some #{kind} before allocating." if collection.compact.size + elements.size > max_size
 
       return collection.concat(elements) unless collection.index nil # just concat arrays if no nil item
 
       indices = []
       collection.each_with_index do |item, index|
         break if indices.size >= elements.size
+
         item.nil? ? indices.push(index) : indices.clear
       end
 
-      case
-      when indices.size >= elements.size
+      if indices.size >= elements.size
         collection[indices.first, elements.size] = elements
-      when collection.size + elements.size <= max_size
+      elsif collection.size + elements.size <= max_size
         collection.concat elements
       else
-        raise SCError.new("No block of #{elements.size} consecutive #{kind} indices is available.")
+        raise SCError, "No block of #{elements.size} consecutive #{kind} indices is available."
       end
     end
 
@@ -185,6 +180,14 @@ module Scruby
         @@servers[index]
         @@servers.uniq!
       end
+    end
+
+    private
+
+    def find_local_server
+      [`which scsynth`,
+       '/Applications/SuperCollider/SuperCollider.app/Contents/Resources/scsynth',
+       '/Applications/SuperCollider/scsynth'].find { |path| !path.empty? && Pathname.new(path).exist? }
     end
   end
 
