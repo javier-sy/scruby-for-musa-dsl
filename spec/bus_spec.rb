@@ -35,7 +35,7 @@ describe Bus do
     end
 
     it 'should set control rate' do
-      Bus.control(@server).rate.should == :control
+      ControlBus.allocate(@server).rate.should == :control
     end
 
     it 'should allocate in server on instantiation and have index' do
@@ -82,14 +82,15 @@ describe Bus do
       it 'should allocate consecutive when passing more than one channel for audio' do
         @audio.index.should == 16
         buses = @server.audio_buses
-        buses[16..-1].should have(4).elements
-        Bus.audio(@server).index.should == 20
+        buses[16..-1].compact.size.should == 4
+
+        AudioBus.allocate(@server).index.should == 20
       end
 
       it 'should allocate consecutive when passing more than one channel for control' do
         @control.index.should == 0
-        @server.control_buses.should have(4).elements
-        Bus.control(@server).index.should == 4
+        @server.control_buses.compact.size.should == 4
+        ControlBus.allocate(@server).index.should == 4
       end
 
       it 'should set the number of channels' do
@@ -108,11 +109,12 @@ describe Bus do
 
   describe 'messaging' do
     before :all do
-      @server = Server.new
+      @server = Server.new log: true
       @server.boot
       @server.send '/dumpOSC', 3
-      @bus = ControlBus.allocate @server, channels: 4
       wait
+      @bus = ControlBus.allocate @server, channels: 4
+      @server.log.clear
     end
 
     after :all do

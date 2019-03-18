@@ -18,6 +18,10 @@ module Scruby
       self.class::RATE
     end
 
+    def audio_out?
+      @hardware_out
+    end
+
     def free
       @server.buses(rate).delete(self)
     end
@@ -69,6 +73,10 @@ module Scruby
     include Bus
 
     RATE = :audio
+
+    def to_map
+      raise SCError, 'Cannot use to_map on audio bus'
+    end
   end
 
   class ControlBus
