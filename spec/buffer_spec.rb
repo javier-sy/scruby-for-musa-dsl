@@ -44,8 +44,8 @@ describe Buffer do
 
       it 'should instantiate and send /b_allocRead message' do
         @buffer.should be_a(Buffer)
-        result = unwind(@server.log)
-        result.should =~ %r{\[ "/b_allocRead", #{@buffer.buffnum}, "#{@defsound}", 0, -1, DATA\[20\] \]}
+        output = unwind(@server.log)
+        output.should =~ %r{\[ "/b_allocRead", #{@buffer.buffnum}, "#{@defsound}", 0, -1, DATA\[20\] \]}
       end
 
       it 'should allow passing a completion message'

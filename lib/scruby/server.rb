@@ -40,6 +40,7 @@ module Scruby
 
       @audio_output_count = audio_outputs   || 8
       @audio_input_count  = audio_inputs    || 8
+
       @buffer_count       = buffers         || 1024
       @control_bus_count  = control_buses   || 4096
       @audio_bus_count    = audio_buses     || 128
@@ -51,8 +52,8 @@ module Scruby
 
       @client        = Client.new @port, @host
 
-      # Bus.audio self, @audio_output_count # register hardware buses
-      # Bus.audio self, @audio_input_count
+      AudioBus.allocate self, channels: @audio_output_count, hardware_out: true # register hardware buses
+      AudioBus.allocate self, channels: @audio_input_count, hardware_in: true
 
       Server.all << self
     end
@@ -67,7 +68,8 @@ module Scruby
         return self
       end
 
-      ready, timeout = false, Time.now + 2
+      ready = false
+      timeout = Time.now + 2
 
       @thread = Thread.new do
         Open3.popen3("#{@path} -u #{port}") do |_, stdout, stderr, _|
@@ -116,12 +118,12 @@ module Scruby
     end
 
     def send_bundle(timestamp = nil, *messages)
-      send Bundle.new( timestamp, *messages.map{ |message| Message.new *message  } )
+      send Bundle.new(timestamp, *messages.map { |message| Message.new *message } )
     end
 
     # Encodes and sends a SynthDef to the scsynth server
     def send_synth_def(synth_def)
-      send Bundle.new( nil, Message.new('/d_recv', Blob.new(synth_def.encode), 0) )
+      send Bundle.new(nil, Message.new('/d_recv', Blob.new(synth_def.encode), 0))
     end
 
     # Allocates either buffer or bus indices, should be consecutive
@@ -140,9 +142,10 @@ module Scruby
 
       raise SCError, "No more indices available -- free some #{kind} before allocating." if collection.compact.size + elements.size > max_size
 
-      return collection.concat(elements) unless collection.index nil # just concat arrays if no nil item
+      return collection.concat(elements) unless collection.index(nil) # just concat arrays if no nil item
 
       indices = []
+
       collection.each_with_index do |item, index|
         break if indices.size >= elements.size
 
@@ -151,10 +154,20 @@ module Scruby
 
       if indices.size >= elements.size
         collection[indices.first, elements.size] = elements
+
       elsif collection.size + elements.size <= max_size
         collection.concat elements
+
       else
         raise SCError, "No block of #{elements.size} consecutive #{kind} indices is available."
+      end
+    end
+
+    def buses(rate)
+      if rate == :audio
+        @audio_buses
+      elsif rate == :control
+        @control_buses
       end
     end
 

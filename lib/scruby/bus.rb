@@ -3,71 +3,81 @@ module Scruby
     attr_accessor :main_bus
     attr_reader :server, :channels
 
-    def initialize(server, channels: 1, main_bus: self, hardware_out: false)
+    def initialize(server, channels = 1, main_bus: self, hardware_in: false, hardware_out: false)
       @server = server
       @channels = channels
       @main_bus = main_bus
+
+      @hardware_in = hardware_in
       @hardware_out = hardware_out
     end
 
-    # def audio_out?
-    #   index < @server.instance_variable_get(:@opts)[:audio_outputs]
-    # end
+    private :initialize
+
+    def rate
+      self.class::RATE
+    end
 
     def free
-      @server.buses(rate).delete self
+      @server.buses(rate).delete(self)
     end
 
     def index
-      @server.buses(rate).index self
+      @server.buses(rate).index(self)
     end
 
-    def rate; self.class::RATE end
+    def set(*args)
+      args.flatten!
 
-    def self.included base
+      message_args = []
+      (index...channels).to_a.zip(args) do |chan, val|
+        message_args.push(chan).push(val) if chan && val
+      end
+
+      if args.size > channels
+        warn "You tried to set #{args.size} values for bus #{index} that only has #{channels} channels, extra values are ignored."
+      end
+
+      @server.send '/c_set', *message_args
+    end
+
+    def fill(value, channels = @channels)
+      if channels > @channels
+        warn "You tried to set #{channels} values for bus #{index} that only has #{@channels} channels, extra values are ignored."
+      end
+
+      @server.send '/c_fill', index, channels.min(@channels), value
+    end
+
+    def self.included(base)
       base.extend ClassMethods
     end
 
     module ClassMethods
-      def allocate_buses server, channels = 1
-        buses = (1..channels).map{ new(server, channels) }
-        buses.each { |bus| bus.main_bus = buses.first }
-        server.allocate :"#{self::RATE}_buses", buses
-        buses.first
-      end
-    end
+      def allocate(server, channels: 1, hardware_in: false, hardware_out: false)
+        buses = (1..channels).map { new(server, channels, hardware_in: hardware_in, hardware_out: hardware_out) }
+        first = buses.first
 
-    module Messaging
-      def set *args
-        args.flatten!
-        message_args = []
-        (index...channels).to_a.zip(args) do |chan, val|
-          message_args.push(chan).push(val) if chan and val
-        end
-        if args.size > channels
-          warn "You tried to set #{args.size} values for bus #{index} that only has #{channels} channels, extra values are ignored."
-        end
-        @server.send '/c_set', *message_args
-      end
-
-      def fill value, channels = @channels
-        if channels > @channels
-          warn "You tried to set #{channels} values for bus #{index} that only has #{@channels} channels, extra values are ignored."
-        end
-        @server.send '/c_fill', index, channels.min(@channels), value
+        buses.each { |bus| bus.main_bus = first }
+        server.allocate "#{self::RATE}_buses".intern, *buses
+        first
       end
     end
   end
 
   class AudioBus
     include Bus
+
     RATE = :audio
   end
 
   class ControlBus
     include Bus
+
     RATE = :control
 
-    def to_map; "c#{index}" end
+    def to_map
+      "c#{index}"
+    end
   end
 end
