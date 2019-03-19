@@ -10,7 +10,6 @@ include Scruby
 include Ugens
 
 describe EnvGen do
-
   it 'should not instantiate with #new' do
     lambda { EnvGen.new :audio, 1, 2 }.should raise_error(NoMethodError)
   end

@@ -3,7 +3,7 @@ module Scruby
     @@base_id = 999
     attr_reader :servers, :group, :id
 
-    ACTIONS = [:head, :tail, :before, :after, :replace]
+    ACTIONS = %i[head tail before after replace].freeze
 
     def initialize(*args)
       args.flatten!
@@ -46,7 +46,7 @@ module Scruby
       content = []
 
       args = args.to_a.each do |param, bus|
-        raise ArgumentError, "`#{ control }` is not a Bus" unless bus.kind_of? Bus
+        raise ArgumentError, "`#{ control }` is not a Bus" unless bus.is_a?(Bus)
 
         array = audio   if bus.rate == :audio
         array = control if bus.rate == :control
@@ -68,13 +68,13 @@ module Scruby
       self
     end
 
-    def move_before node
+    def move_before(node)
       @group = node.group
       send '/n_before', id, node.id
       self
     end
 
-    def move_after node
+    def move_after(node)
       @group = node.group
       send '/n_after', id, node.id
       self
@@ -82,12 +82,12 @@ module Scruby
 
     # def move_to_head group
     #   @group = node.group
-    #   @server.each{ |s| s.send '/n_after', self.id, node.id }
+    #   @server.each { |s| s.send '/n_after', self.id, node.id }
     # end
     #
     # def move_to_tail group
     #   @group = node.group
-    #   @server.each{ |s| s.send '/n_after', self.id, node.id }
+    #   @server.each { |s| s.send '/n_after', self.id, node.id }
     # end
 
     def playing?

@@ -90,11 +90,11 @@ module Scruby
       include MultiOut
 
       class << self
-        def ar a, b, azimuth, gain: 1
+        def ar a, b, azimuth:, gain: 1
           new :audio, 3, a, b, azimuth, gain
         end
 
-        def kr a, b, azimuth, gain: 1
+        def kr a, b, azimuth:, gain: 1
           new :control, 3, a, b, azimuth, gain
         end
       end

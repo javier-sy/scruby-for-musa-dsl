@@ -30,8 +30,8 @@ describe Server do
       @server.quit
     end
 
-    it 'should not rise scynth not found error' do
-      lambda{ @server.boot }.should_not raise_error
+    it 'should not rise scsynth not found error' do
+      lambda { @server.boot }.should_not raise_error
     end
 
     it 'should not reboot' do
@@ -74,8 +74,8 @@ describe Server do
     before :all do
       @server = Server.new log: true
       @server.boot
-      @server.send '/dumpOSC', 3
-      sleep 0.05
+      @server.send '/dumpOSC', 1
+      wait
     end
 
     after :all do
@@ -88,7 +88,7 @@ describe Server do
 
     it 'should send dump' do
       @server.send '/dumpOSC', 1
-      sleep 0.1
+      wait
       unwind(@server.log).should =~ %r{/dumpOSC}
     end
 
@@ -147,12 +147,9 @@ describe Server do
   end
 
   describe 'buffers allocation' do
-    before do
-      @server = Server.new
-    end
-
     describe 'buffers allocation' do
       before do
+        @server      = Server.new
         @class       = Buffer
         @kind        = :buffers
         @collection  = :@buffers
@@ -164,17 +161,20 @@ describe Server do
 
     describe 'audio buses allocation' do
       before do
+        @server      = Server.new
         @class       = AudioBus
         @kind        = :audio_buses
         @collection  = :@audio_buses
-        @max_size    = @allowed_elements = 128
-        @index_start = 0
+        @max_size    = 128
+        @allowed_elements = 128 - 16
+        @index_start = 16
       end
       it_should_behave_like 'allocates'
     end
 
     describe 'control buses allocation' do
       before do
+        @server      = Server.new
         @class       = ControlBus
         @kind        = :control_buses
         @collection  = :@control_buses

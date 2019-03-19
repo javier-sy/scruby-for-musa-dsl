@@ -9,13 +9,8 @@ require 'scruby/ugens/ugen'
 require 'scruby/ugens/operation_ugens'
 require 'scruby/ugens/ugen_operations'
 
-
 include Scruby
 include Ugens
-
-class MockUgen < Ugen
-  class << self; public :new; end
-end
 
 describe UgenOperations do
 

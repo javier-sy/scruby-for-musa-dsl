@@ -1,20 +1,21 @@
 require_relative 'helper'
 
-require 'scruby/control_name'
+require 'scruby/core_ext/typed_array'
 require 'scruby/core_ext/delegator_array'
+
+require 'scruby/control_name'
 require 'scruby/env'
+
 require 'scruby/ugens/ugen'
 require 'scruby/ugens/ugen_operations'
-require 'scruby/synthdef'
+require 'scruby/ugens/operation_ugens'
 require 'scruby/ugens/multi_out'
-require 'scruby/core_ext/typed_array'
+require 'scruby/ugens/ugens'
+
+require 'scruby/synthdef'
 
 include Scruby
 include Ugens
-
-class MockUgen < Ugen
-  class << self; public :new; end
-end
 
 describe SynthDef, 'instantiation' do
 
@@ -65,7 +66,6 @@ describe SynthDef, 'instantiation' do
 
     it 'should set default values if not provided'
     it 'should accept a graph function'
-
   end
 
   describe '#collect_control_names' do
@@ -109,14 +109,10 @@ describe SynthDef, 'instantiation' do
   end
 
   describe '#build_controls' do
-    before :all do
-      RATES = [:scalar, :trigger, :control]
-    end
-
     before do
       @sdef     = SynthDef.new(:name) {}
       @function = double 'grap_function', arguments: [:arg1, :arg2, :arg3, :arg4]
-      @control_names = Array.new(rand(10)+15) { |i| ControlName.new "arg#{i+1}".to_sym, i, RATES[rand(3)], i }
+      @control_names = Array.new(rand(10)+15) { |i| ControlName.new "arg#{i+1}".to_sym, i, [:scalar, :trigger, :control][rand(3)], i }
     end
 
     it 'should call Control#and_proxies..' do
@@ -170,24 +166,13 @@ describe SynthDef, 'instantiation' do
     end
 
     it 'should remove nil from constants array'
-
-  end
-
-end
-
-
-module Spec
-  class SinOsc < Ugen
-    def self.ar freq: 440.0, phase: 0.0 #not interested in muladd
-      new :audio, freq, phase
-    end
   end
 end
 
 describe 'encoding' do
 
   before do
-    @sdef = SynthDef.new(:hola) { Spec::SinOsc.ar }
+    @sdef = SynthDef.new(:hola) { SinOsc.ar }
     @encoded = [ 83, 67, 103, 102, 0, 0, 0, 1, 0, 1, 4, 104, 111, 108, 97, 0, 2, 67, -36, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 6, 83, 105, 110, 79, 115, 99, 2, 0, 2, 0, 1, 0, 0, -1, -1, 0, 0, -1, -1, 0, 1, 2, 0, 0 ].pack('C*')
   end
 
@@ -224,37 +209,9 @@ describe 'encoding' do
   end
 
   describe 'sending' do
-    before :each do
-      @server = double('server', instance_of?: true, send_synth_def: nil)
-    end
-
-    before do
-      @servers = (0..3).map { double('server', instance_of?: true, send_synth_def: nil) }
-      @sdef = SynthDef.new(:hola) { Spec::SinOsc.ar }
-    end
-
-    it 'should accept an array or several Servers' do
-      @sdef.send @servers
-      @sdef.send *@servers
-    end
-
-    it 'should not accept non servers' do
-      lambda { @sdef.send [1, 2] }.should raise_error(NoMethodError)
-      lambda { @sdef.send 1, 2 }.should   raise_error(NoMethodError)
-    end
-
-    it 'should send self to each of the servers' do
-      @servers.each { |s| s.should_receive(:send_synth_def).with(@sdef) }
-      @sdef.send(@servers)
-    end
-
-    it 'should send to Server.all if not provided with a list of servers' do
-      ::Server = double('Server', all: [@server])
-
-      @server.should_receive(:send_synth_def).with(@sdef)
-      Server.should_receive(:all).and_return([@server])
-
-      @sdef.send
-    end
+    it 'should accept an array or several Servers'
+    it 'should not accept non servers'
+    it 'should send self to each of the servers'
+    it 'should send to Server.all if not provided with a list of servers'
   end
 end

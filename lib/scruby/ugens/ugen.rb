@@ -55,14 +55,17 @@ module Scruby
     class Ugen
       attr_reader :inputs, :rate, :index, :special_index, :output_index, :channels
 
-      RATES        = :scalar, :trigger, :demand, :control, :audio
-      E_RATES      = :scalar, :control, :audio, :demand
-      VALID_INPUTS = Numeric, Array, Ugen, Env, ControlName
+      RATES        = %i[scalar trigger demand control audio].freeze
+      E_RATES      = %i[scalar control audio demand].freeze
+
+      VALID_INPUTS = [Numeric, Array, Ugen, Env, ControlName].freeze
+
       @@synthdef   = nil
 
+      def initialize(rate, *inputs)
+        @rate = rate
+        @inputs = inputs.compact
 
-      def initialize rate, *inputs
-        @rate, @inputs   = rate, inputs.compact
         @special_index ||= 0
         @output_index  ||= 0
         @channels      ||= [1]
@@ -70,17 +73,19 @@ module Scruby
       end
 
       # Instantiate a new MulAdd passing self and the multiplication and addition arguments
-      def muladd mul, add
+      def muladd(mul, add)
         MulAdd.new self, mul, add
       end
 
       def encode
-        self.class.to_s.split('::').last.encode + [ E_RATES.index(rate) ].pack('w') +
-          [ inputs.size, channels.size, special_index, collect_input_specs ].flatten.pack('n*') +
-          output_specs.pack('w*')
+        self.class.to_s.split('::').last.encode +
+            [E_RATES.index(rate)].pack('w') +
+            [inputs.size, channels.size, special_index, collect_input_specs].flatten.pack('n*') +
+            output_specs.pack('w*')
       end
 
       private
+
       def synthdef #:nodoc:
         @synthdef ||= Ugen.synthdef
       end
@@ -98,7 +103,7 @@ module Scruby
       end
 
       def collect_input_specs #:nodoc:
-        @inputs.collect{ |i| i.send :input_specs, synthdef  }
+        @inputs.collect { |i| i.send :input_specs, synthdef }
       end
 
       def output_specs #:nodoc:
@@ -106,49 +111,58 @@ module Scruby
       end
 
       public
-      def == other
-        self.class    == other.class    and
-        self.rate     == other.rate     and
-        self.inputs   == other.inputs   and
-        self.channels == other.channels
+
+      def ==(other)
+        self.class == other.class    &&
+          rate     == other.rate     &&
+          inputs   == other.inputs   &&
+          channels == other.channels
       end
 
       class << self
-        #:nodoc:
+
         private
-        def new rate, *inputs
-          if rate.kind_of? Array
+
+        #:nodoc:
+        def new(rate, *inputs)
+
+          if rate.is_a?(Array)
             rate   = RATES.slice rate.collect { |rate| # get the highest rate, raise error if rate is not defined
               rate = rate.to_sym
-              raise ArgumentError.new( "#{rate} not a defined rate") unless RATES.include? rate
+              raise ArgumentError, "#{rate} not a defined rate" unless RATES.include?(rate)
+
               RATES.index rate
             }.max
           else
-            raise ArgumentError.new( "#{rate} not a defined rate") unless RATES.include? rate.to_sym
+            raise ArgumentError, "#{rate} not a defined rate" unless RATES.include?(rate.to_sym)
           end
 
           size = 1 # Size of the largest multichannel input (Array)
           inputs.peel! # First input if input is Array and size is 1
+
           inputs.map! do |input|
             input = input.as_ugen_input if input.respond_to?(:as_ugen_input) # Convert input to prefered form
-            raise ArgumentError.new( "#{ input.inspect } is not a valid ugen input") unless valid_input? input
-            size  = input.size if input.size > size if input.kind_of? Array
+
+            raise ArgumentError, "#{ input.inspect } is not a valid ugen input" unless valid_input?(input)
+
+            size = input.size if input.kind_of?(Array) && input.size > size
             input
           end
 
-          return super( rate, *inputs.flatten ) unless size > 1 #return an Ugen if no array was passed as an input
+          return super(rate, *inputs.flatten) unless size > 1 #return an Ugen if no array was passed as an input
 
           inputs.map! do |input|
             Array === input ? input.wrap_to!(size) : input = Array.new(size, input)
             input
           end
           output = inputs.transpose
-          output.map! do |new_inputs| new rate, *new_inputs end
+          output.map! { |new_inputs| new rate, *new_inputs }
           output.to_da
         end
 
         public
-        def valid_input? obj
+
+        def valid_input?(obj)
           case obj
           when *VALID_INPUTS then true
           else false
@@ -159,14 +173,19 @@ module Scruby
           @@synthdef
         end
 
-        def synthdef= synthdef #:nodoc:
+        def synthdef=(synthdef) #:nodoc:
           @@synthdef = synthdef
         end
 
         def params
           {}
         end
+      end
+    end
 
+    class MockUgen < Ugen
+      class << self
+        public :new
       end
     end
   end

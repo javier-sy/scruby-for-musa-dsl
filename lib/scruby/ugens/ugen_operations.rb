@@ -1,3 +1,5 @@
+require 'yaml'
+
 module Scruby
   module Ugens
     # This module enables Ugen operations for Ugens, Numeric and Arrays, when any instance of this classes executes an operation with an Ugen a BinaryUgenOp
@@ -11,43 +13,44 @@ module Scruby
     # neg, bitNot, abs, asFloat, ceil, floor, frac, sign, squared, cubed, sqrt, exp, reciprocal, midicps, cpsmidi, midiratio, ratiomidi, dbamp, ampdb, octcps, cpsoct, log, log2, log10, sin, cos, tam, asin, acos, atan, sinh, cosh, tanh, rand, rand2, linrand, bilinrand, sum3rand, distort, softclip, coin, rectWindow, hanWindow, welWindow, triWindow, ramp and scurve
     #
     module UgenOperations
-      p "Loading operation_indices.yaml"
-      f = File.open( File.dirname(__FILE__) + "/operation_indices.yaml" )
-      operation_indices = YAML::load f
+      p 'Loading operation_indices.yaml'
+      f = File.open(File.dirname(__FILE__) + '/operation_indices.yaml')
+      operation_indices = YAML.safe_load(f, [:Symbol])
+
       UNARY      = operation_indices['unary']
       BINARY     = operation_indices['binary']
-      SAFE_NAMES = { :+ => :plus, :- => :minus, :* => :mult, :/ => :div2, :<= => :less_than_or_eql, :>= => :more_than_or_eql }
+      SAFE_NAMES = { :+ => :plus, :- => :minus, :* => :mult, :/ => :div2, :<= => :less_than_or_eql, :>= => :more_than_or_eql }.freeze
 
-      def self.included klass
+      def self.included(klass)
         # Define unary operations
         UNARY.each_key do |op|
-          define_method(op){ UnaryOpUGen.new op, self } unless klass.instance_methods.include? op
+          define_method(op) { UnaryOpUGen.new op, self } unless klass.instance_methods.include? op
         end
 
         # Define binary operations
         ugen_subclass = klass.ancestors.include? Ugen
         meth_def =
-        if ugen_subclass
-          proc do |safe, op|
-            proc{ |input| BinaryOpUGen.new op, self, input }
-          end
-        else
-          proc do |safe, op|
-            proc do |input|
-              if input.kind_of? Ugen
-                BinaryOpUGen.new op, self, input
-              else
-                __send__ "__original_#{ safe }", input
+          if ugen_subclass
+            proc do |_safe, op|
+              proc { |input| BinaryOpUGen.new op, self, input }
+            end
+          else
+            proc do |safe, op|
+              proc do |input|
+                if input.is_a? Ugen
+                  BinaryOpUGen.new op, self, input
+                else
+                  __send__ "__original_#{safe}", input
+                end
               end
             end
           end
-        end
 
         BINARY.each_key do |op|
           safe = SAFE_NAMES[op]
-          define_method "__ugenop_#{ safe || op }", &meth_def.call(safe || op, op)
-          klass.send :alias_method, "__original_#{ safe || op }", op if safe unless ugen_subclass
-          klass.send :alias_method, op, "__ugenop_#{ safe || op }"
+          define_method "__ugenop_#{safe || op}", &meth_def.call(safe || op, op)
+          klass.send :alias_method, "__original_#{safe || op}", op unless ugen_subclass || !safe
+          klass.send :alias_method, op, "__ugenop_#{safe || op}"
         end
       end
     end
@@ -55,5 +58,3 @@ module Scruby
     [Ugen, Integer, Float].each { |k| k.send :include, UgenOperations }
   end
 end
-
-

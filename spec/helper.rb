@@ -36,3 +36,4 @@ def unwind(queue)
   1.upto(queue.size) { res += queue.pop }
   res
 end
+

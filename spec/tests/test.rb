@@ -5,7 +5,6 @@
 # - Fix specs
 # - Add instructions (e.g. scsyth location)
 require 'scruby'
-require 'pry'
 
 s = Server.new
 s.boot

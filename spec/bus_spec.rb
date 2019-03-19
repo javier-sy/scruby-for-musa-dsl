@@ -8,13 +8,16 @@ require 'scruby/server'
 
 include Scruby
 
-
 describe Bus do
   describe 'instantiation' do
     before do
       @server  = Server.new
       @audio   = AudioBus.allocate @server
       @control = ControlBus.allocate @server
+    end
+
+    after do
+      @server.quit
     end
 
     it 'should be a bus' do
@@ -71,39 +74,43 @@ describe Bus do
       @server.audio_buses[0].should be_audio_out
       @audio.should_not be_audio_out
     end
+  end
 
-    describe 'multichannel' do
-      before do
-        @server   = Server.new
-        @audio    = AudioBus.allocate @server, channels: 4
-        @control  = ControlBus.allocate @server, channels: 4
-      end
+  describe 'multichannel' do
+    before do
+      @server   = Server.new
+      @audio    = AudioBus.allocate @server, channels: 4
+      @control  = ControlBus.allocate @server, channels: 4
+    end
 
-      it 'should allocate consecutive when passing more than one channel for audio' do
-        @audio.index.should == 16
-        buses = @server.audio_buses
-        buses[16..-1].compact.size.should == 4
+    after do
+      @server.quit
+    end
 
-        AudioBus.allocate(@server).index.should == 20
-      end
+    it 'should allocate consecutive when passing more than one channel for audio' do
+      @audio.index.should == 16
+      buses = @server.audio_buses
+      buses[16..-1].compact.size.should == 4
 
-      it 'should allocate consecutive when passing more than one channel for control' do
-        @control.index.should == 0
-        @server.control_buses.compact.size.should == 4
-        ControlBus.allocate(@server).index.should == 4
-      end
+      AudioBus.allocate(@server).index.should == 20
+    end
 
-      it 'should set the number of channels' do
-        @audio.channels.should   == 4
-        @control.channels.should == 4
-      end
+    it 'should allocate consecutive when passing more than one channel for control' do
+      @control.index.should == 0
+      @server.control_buses.compact.size.should == 4
+      ControlBus.allocate(@server).index.should == 4
+    end
 
-      it 'should depend on a main bus' do
-        @server.audio_buses[16].main_bus.should  == @audio   #main bus
-        @server.audio_buses[17].main_bus.should  == @audio   #main bus
-        @server.control_buses[0].main_bus.should == @control #main bus
-        @server.control_buses[1].main_bus.should == @control #main bus
-      end
+    it 'should set the number of channels' do
+      @audio.channels.should   == 4
+      @control.channels.should == 4
+    end
+
+    it 'should depend on a main bus' do
+      @server.audio_buses[16].main_bus.should  == @audio   #main bus
+      @server.audio_buses[17].main_bus.should  == @audio   #main bus
+      @server.control_buses[0].main_bus.should == @control #main bus
+      @server.control_buses[1].main_bus.should == @control #main bus
     end
   end
 
@@ -111,7 +118,7 @@ describe Bus do
     before :all do
       @server = Server.new log: true
       @server.boot
-      @server.send '/dumpOSC', 3
+      @server.send '/dumpOSC', 1
       wait
       @bus = ControlBus.allocate @server, channels: 4
       @server.log.clear
@@ -144,7 +151,7 @@ describe Bus do
         @bus.should_receive(:warn).with("You tried to set 5 values for bus #{ @bus.index } that only has 4 channels, extra values are ignored.")
         @bus.set 101, 202, 303, 404, 505
         wait
-        unwind(@server.log).should =~ %r{\[ "/c_set", #{ @bus.index }, 101, #{ @bus.index + 1}, 202, #{ @bus.index + 2}, 303, #{ @bus.index + 3}, 404 \]}
+        unwind(@server.log).should =~ %r{\[ "/c_set", #{@bus.index}, 101, #{@bus.index + 1}, 202, #{@bus.index + 2}, 303, #{@bus.index + 3}, 404 \]}
       end
     end
 

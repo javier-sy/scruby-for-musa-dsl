@@ -12,8 +12,6 @@ module Scruby
       @hardware_out = hardware_out
     end
 
-    private :initialize
-
     def rate
       self.class::RATE
     end

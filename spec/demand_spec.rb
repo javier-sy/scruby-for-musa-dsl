@@ -12,10 +12,6 @@ require 'scruby/ugens/demand'
 include Scruby
 include Ugens
 
-class MockUgen < Ugen
-  class << self; public :new; end
-end
-
 describe Demand do
   shared_examples_for 'Demand Ugen' do
     before do

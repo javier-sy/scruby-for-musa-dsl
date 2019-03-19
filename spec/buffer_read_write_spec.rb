@@ -13,28 +13,22 @@ require 'scruby/ugens/buffer_read_write'
 include Scruby
 include Ugens
 
-class MockUgen < Ugen
-  class << self; public :new; end
-end
-
-
 describe 'Buffer Read Ugens' do
   shared_examples_for 'Buffer reader Ugen' do
     before do
-      @proxies  = @class.send @method, *@params
-      @inputs ||= @params
+      @proxies  = @class.send @method, *@params, **@named_params
       @instance = @proxies.first.source
     end
 
-    it "should output a DelegatorArray" do
+    it 'should output a DelegatorArray' do
       @proxies.should be_a(DelegatorArray)
     end
 
-    it "should have correct rate" do
+    it 'should have correct rate' do
       @instance.rate.should == @rate
     end
 
-    it "should return an array of output proxies" do
+    it 'should return an array of output proxies' do
       @proxies.should be_a(Array)
       @proxies.count.should eq @channels
       @proxies.each_with_index do |proxy, i|
@@ -42,10 +36,6 @@ describe 'Buffer Read Ugens' do
         proxy.should be_a(OutputProxy)
         proxy.output_index.should == i
       end
-    end
-
-    it "should set inputs" do
-      @instance.inputs.should == @inputs
     end
   end
 
@@ -64,7 +54,7 @@ describe 'Buffer Read Ugens' do
     end
     it_should_behave_like 'Buffer reader Ugen'
 
-    it "should just accept audio inputs if rate is audio" # do
+    it 'should just accept audio inputs if rate is audio' # do
     #      lambda { @class.new( :audio, MockUgen.new(:control) ) }.should raise_error(ArgumentError)
     #    end
   end
@@ -73,8 +63,9 @@ describe 'Buffer Read Ugens' do
     before do
       @class    = PlayBuf
       @channels = 2
-      @inputs   = 1.0, 1.0, 1.0, 1.0, 1.0, 1.0
+      @inputs   = nil
       @params   = @channels, *@inputs
+      @named_params = { bufnum: 1, rate: 1.0, trigger: 1.0, start: 1.0, loop: 1.0, doneAction: 0 }
     end
 
     it_should_behave_like 'Buffer reader Ugen with control rate'
@@ -85,8 +76,9 @@ describe 'Buffer Read Ugens' do
     before do
       @class    = PlayBuf
       @channels = 4
-      @inputs   = 1.0, 1.0, 1.0, 1.0, 1.0, 1.0
+      @inputs   = nil
       @params   = @channels, *@inputs
+      @named_params = { bufnum: 1, rate: 1.0, trigger: 1.0, start: 1.0, loop: 1.0, doneAction: 0 }
     end
 
     it_should_behave_like 'Buffer reader Ugen with control rate'
@@ -97,13 +89,14 @@ describe 'Buffer Read Ugens' do
     before do
       @class    = TGrains
       @channels = 2
-      @inputs   = 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0
+      @inputs   = nil
       @params   = @channels, *@inputs
+      @named_params = { trigger: 1.0, bufnum: 1.0, rate: 1.0, center_pos: 1.0, dur: 1.0, pan: 1.0, amp: 1.0, interp: 1.0 }
     end
 
     it_should_behave_like 'Buffer reader Ugen with audio rate'
 
-    it "should require at least two channels" do
+    it 'should require at least two channels' do
       lambda { @class.ar 1, *@params[1..-1] }.should raise_error(ArgumentError)
     end
   end
@@ -112,13 +105,14 @@ describe 'Buffer Read Ugens' do
     before do
       @class    = TGrains
       @channels = 4
-      @inputs   = 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0
+      @inputs   = nil
       @params   = @channels, *@inputs
+      @named_params = { trigger: 1.0, bufnum: 1.0, rate: 1.0, center_pos: 1.0, dur: 1.0, pan: 1.0, amp: 1.0, interp: 1.0 }
     end
 
     it_should_behave_like 'Buffer reader Ugen with audio rate'
 
-    it "should require at least two channels" do
+    it 'should require at least two channels' do
       lambda { @class.ar 1, *@params[1..-1] }.should raise_error(ArgumentError)
     end
   end
@@ -127,22 +121,24 @@ describe 'Buffer Read Ugens' do
     before do
       @class    = BufRd
       @channels = 2
-      @inputs   = 1.0, 1.0, 1.0, 1.0
+      @inputs   = nil
       @params   = @channels, *@inputs
+      @named_params = { bufnum: 0, phase: 0.0, loop: 1.0, interpolation: 2 }
     end
 
     it_should_behave_like 'Buffer reader Ugen with control rate'
     it_should_behave_like 'Buffer reader Ugen with audio rate'
 
-    it "should require audio rate for phase"
+    it 'should require audio rate for phase'
   end
 
   describe BufRd, 'Four channel' do
     before do
       @class    = BufRd
       @channels = 4
-      @inputs   = 1.0, 1.0, 1.0, 1.0
+      @inputs   = nil
       @params   = @channels, *@inputs
+      @named_params = { bufnum: 0, phase: 0.0, loop: 1.0, interpolation: 2 }
     end
 
     it_should_behave_like 'Buffer reader Ugen with control rate'
@@ -157,12 +153,8 @@ describe 'Buffer write Ugens' do
       @buff_ugen = @class.send @method, *@params
     end
 
-    it "should have correct rate" do
+    it 'should have correct rate' do
       @buff_ugen.rate.should == @rate
-    end
-
-    it "should set inputs" do
-      @buff_ugen.inputs.should == @inputs
     end
   end
 
@@ -186,144 +178,130 @@ describe 'Buffer write Ugens' do
     before do
       @class  = BufWr
       @array  = [MockUgen.new(:audio, 1, 2)]*4
-      @inputs = 1, 2, 3, *@array
-      @params = @array, 1, 2, 3
+      @params = [@array]
+      @named_params = { bufnum: 1, phase: 2, loop: 3 }
     end
     it_should_behave_like 'Buffer writter Ugen with audio rate'
     it_should_behave_like 'Buffer writter Ugen with control rate'
 
-    it "should require phase to be audio rate"
+    it 'should require phase to be audio rate'
   end
 
   describe BufWr, 'single input' do
     before do
       @class  = BufWr
       @array  = MockUgen.new(:audio, 1, 2)
-      @inputs = 1, 2, 3, @array
-      @params = @array, 1, 2, 3
+      @params = [@array]
+      @named_params = { bufnum: 1, phase: 2, loop: 3 }
     end
     it_should_behave_like 'Buffer writter Ugen with audio rate'
     it_should_behave_like 'Buffer writter Ugen with control rate'
 
-    it "should require phase to be audio rate"
+    it 'should require phase to be audio rate'
   end
 
   describe RecordBuf, 'array input' do
     before do
       @class  = RecordBuf
       @array  = [MockUgen.new(:audio, 1, 2)]*4
-      @inputs = 1, 2, 3, 4, 5, 6, 7, 8, *@array
-      @params = @array, 1, 2, 3, 4, 5, 6, 7, 8
+      @params = [@array]
+      @named_params = { bufnum: 1, offset: 2, rec_level: 3, pre_level: 4, run: 5, loop: 6, trigger: 7, doneAction: 8 }
     end
     it_should_behave_like 'Buffer writter Ugen with audio rate'
     it_should_behave_like 'Buffer writter Ugen with control rate'
 
-    it "should require phase to be audio rate"
+    it 'should require phase to be audio rate'
   end
 
   describe RecordBuf, 'single input' do
     before do
       @class  = RecordBuf
       @array  = MockUgen.new(:audio, 1, 2)
-      @inputs = 1, 2, 3, 4, 5, 6, 7, 8, @array
-      @params = @array, 1, 2, 3, 4, 5, 6, 7, 8
+      @params = [@array]
+      @named_params = { bufnum: 1, offset: 2, rec_level: 3, pre_level: 4, run: 5, loop: 6, trigger: 7, doneAction: 8 }
     end
     it_should_behave_like 'Buffer writter Ugen with audio rate'
     it_should_behave_like 'Buffer writter Ugen with control rate'
 
-    it "should require phase to be audio rate"
+    it 'should require phase to be audio rate'
   end
 
   describe ScopeOut, 'array input' do
     before do
       @class  = ScopeOut
       @array  = [MockUgen.new(:audio, 1, 2)]*4
-      @inputs = 1, *@array
-      @params = @array, 1
+      @params = [@array]
+      @named_params = { bufnum: 1 }
     end
     it_should_behave_like 'Buffer writter Ugen with audio rate'
     it_should_behave_like 'Buffer writter Ugen with control rate'
 
-    it "should require phase to be audio rate"
+    it 'should require phase to be audio rate'
   end
 
   describe ScopeOut, 'single input' do
     before do
       @class  = ScopeOut
       @array  = MockUgen.new(:audio, 1, 2)
-      @inputs = 1, @array
-      @params = @array, 1
+      @params = [@array]
+      @named_params = { bufnum: 1 }
     end
     it_should_behave_like 'Buffer writter Ugen with audio rate'
     it_should_behave_like 'Buffer writter Ugen with control rate'
 
-    it "should require phase to be audio rate"
+    it 'should require phase to be audio rate'
   end
 
   describe Tap, 'single input' do
     before do
       @inputs    = 5, 1, 0, SampleRate.new.neg * 3, 1, 0
-      @buff_ugen = Tap.ar( 5, 2, 3 ).first.source
+      @buff_ugen = Tap.ar(bufnum: 5, num_channels: 2, delay_time: 3).first.source
     end
 
-    it "should be instance of PlayBuf" do
+    it 'should be instance of PlayBuf' do
       @buff_ugen.should be_a(PlayBuf)
     end
 
-    it "should have correct rate" do
+    it 'should have correct rate' do
       @buff_ugen.rate.should == :audio
-    end
-
-    it "should set inputs" do
-      @buff_ugen.inputs.should == @inputs
     end
   end
 
   describe Tap, 'single input' do
     before do
-      @inputs    = 5, 1, 0, SampleRate.new.neg * 3, 1, 0
       @channels  = 1
-      @proxies   = Tap.ar( 5, @channels, 3 )
+      @proxies   = Tap.ar(bufnum: 5, num_channels: @channels, delay_time: 3)
     end
 
-    it "should have one proxy" do
+    it 'should have one proxy' do
       @proxies.count.should eq @channels
     end
 
-    it "should be instance of PlayBuf" do
-      @proxies.each{ |p| p.source.should be_a(PlayBuf) }
+    it 'should be instance of PlayBuf' do
+      @proxies.each { |p| p.source.should be_a(PlayBuf) }
     end
 
-    it "should have correct rate" do
-      @proxies.each{ |p| p.source.rate.should == :audio }
-    end
-
-    it "should set inputs" do
-      @proxies.each{ |p| p.source.inputs == @inputs }
+    it 'should have correct rate' do
+      @proxies.each { |p| p.source.rate.should == :audio }
     end
   end
 
   describe Tap, 'multi input' do
     before do
-      @inputs    = 5, 1, 0, SampleRate.new.neg * 3, 1, 0
       @channels  = 4
-      @proxies   = Tap.ar(5, @channels, 3)
+      @proxies   = Tap.ar(bufnum: 5, num_channels: @channels, delay_time: 3)
     end
 
-    it "should have one proxy" do
+    it 'should have one proxy' do
       @proxies.count.should eq @channels
     end
 
-    it "should be instance of PlayBuf" do
+    it 'should be instance of PlayBuf' do
       @proxies.each{ |p| p.source.should be_a(PlayBuf) }
     end
 
-    it "should have correct rate" do
+    it 'should have correct rate' do
       @proxies.each{ |p| p.source.rate.should == :audio }
-    end
-
-    it "should set inputs" do
-      @proxies.each{ |p| p.source.inputs == @inputs }
     end
   end
 
