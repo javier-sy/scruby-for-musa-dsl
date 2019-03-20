@@ -3,6 +3,7 @@
 Is a Supercollider library for Musa-DSL Ruby musical composition language.
 
 It is based on scruby from Macario Ortega (c) 2008 and further community modifications, specially of Nicola Bernardini and collaborations on his github repository https://github.com/nicb/scruby
+
 On 2019 I've forked the repository in order to simplify, clean dependencies and adapt for Musa-DSL.
 
 It provides comunication with a remote or local scsynth server and SynthDef creation with a in a similar way to Sclang.
@@ -19,4 +20,4 @@ Copyright (c) 2008 Macario Ortega
 
 Works by Nicola Bernardini and other github collaborators.
 
-Works by Javier Sánchez
+Works by Javier Sánchez Yeste
