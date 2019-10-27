@@ -98,7 +98,7 @@ module Scruby
 
     # Reset the node count
     def self.reset!
-      @@base_id = 2000
+      @@base_id = 999
     end
 
     # Sends a bundle to all registered +servers+ for this node
