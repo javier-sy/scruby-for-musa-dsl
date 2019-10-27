@@ -79,7 +79,7 @@ describe Buffer do
       it 'should send /b_alloc message and instantiate' do
         @buffer.should be_a(Buffer)
         output = unwind(@server.log)
-        output.should =~ %r{\[ "/b_alloc", #{ @buffer.buffnum }, 32768, 1, DATA\[152\] \]}
+        output.should =~ %r{\[ "/b_alloc", #{ @buffer.buffnum }, 32768, 1, DATA\[160\] \]}
         output.should =~ /2f 62 5f 61  6c 6c 6f 63  00 00 00 00  2c 69 69 69/ # /b_alloc etc.
       end
 
