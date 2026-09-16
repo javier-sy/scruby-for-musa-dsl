@@ -10,6 +10,8 @@ It provides comunication with a remote or local scsynth server and SynthDef crea
 
 SynthDef creation and sending is robust but some features are not implemented such as SynthDef variations and others I may not be aware of.
 
+Update 2026: This project is deprecated and archived. Work in progress in another MusaDSL <-> Supercollider (scsynth) bridge by https://yeste.studio.
+
 == Todo
 
 Receive OSC messages from SuperCollider
@@ -20,4 +22,6 @@ Copyright (c) 2008 Macario Ortega
 
 Works by Nicola Bernardini and other github collaborators.
 
-Works by Javier Sánchez Yeste
+2019 - Works by https://yeste.studio
+
+
